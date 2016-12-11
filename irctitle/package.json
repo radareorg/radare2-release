@@ -1,0 +1,7 @@
+{
+	"name": "irctitle",
+	"version": "0.1",
+	"dependencies": {
+		"node-irc": "^0.0.4"
+	}
+}

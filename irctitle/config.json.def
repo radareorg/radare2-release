@@ -1,0 +1,7 @@
+{
+  "nick": "xxx",
+  "channel": "#radare",
+  "host": "irc.freenode.net",
+  "nickserv": "password",
+  "port": 6667
+}
