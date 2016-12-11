@@ -20,6 +20,9 @@ What it builds right now:
 -------------------------
 
 	[*] radare2-1.0.2 tarball is ok
+	[*] Already got radare2-extras-1.0.tar.gz
+	[*] Already got radare2-bindings-1.0.tar.gz
+	[*] Already got radare2-r2pipe-1.0.tar.gz
 	[*] radare2-1.0.2-android-x86 is already done
 	[*] radare2-1.0.2-android-mips is already done
 	[*] radare2-1.0.2-android-arm is already done

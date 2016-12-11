@@ -176,3 +176,24 @@ depends() {
 		)
 	fi
 }
+
+grab_tarball() {(
+	pkg="$1"
+	ver="$2"
+	[ -z "$ver" ] && ver="${VERSION}"
+	mkdir -p out/${ver}
+	cd out/${ver}
+	if [ -f $pkg-${ver}.tar.gz ]; then
+		msg "Already got $pkg-${ver}.tar.gz"
+	else
+		wget -O $pkg-${ver}.tar.gz -c https://github.com/radare/$pkg/archive/${ver}.tar.gz || (
+			rm -f $pkg-${ver}.tar.gz
+		)
+	fi
+)}
+
+download_others() {(
+	grab_tarball radare2-extras ${VERSION_EXTRAS}
+	grab_tarball radare2-bindings ${VERSION_BNDNGS}
+	grab_tarball radare2-r2pipe ${VERSION_R2PIPE}
+)}

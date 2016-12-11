@@ -14,6 +14,7 @@ esac
 
 # include docker.mk
 download radare2
+download_others
 
 capstone() {(
 	cd tmp

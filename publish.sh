@@ -12,3 +12,8 @@ publish_irc() {
 publish_www() {
 	msg "Updating the website..."
 }
+
+publish_android() {
+	msg "Publishing android binaries..."
+	clone
+}
