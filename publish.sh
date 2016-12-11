@@ -84,16 +84,15 @@ publish_cydia() {(
 
 publish_android_bin() {(
 	arch="$1"
-	msg "Publishing android ${arch} binary..."
-	git reset --hard
-	git checkout master
+	git reset --hard >> $LOG
+	git checkout master >> $LOG
 	git pull >> ${LOG}
 	git checkout android-${arch}
 	cmp ../../out/${VERSION}/radare2-${VERSION}-android-${arch}.tar.gz radare2-1.0.0-git-android-${arch}.tar.gz && {
 		msg "Already published ${VERSION} android build for radare2-${arch}"
 		return
 	}
-
+	msg "Publishing android ${arch} binary..."
 	git checkout master
 	git branch -D android-${arch}
 	git checkout -b android-${arch} || exit 1

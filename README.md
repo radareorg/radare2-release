@@ -35,6 +35,13 @@ What it builds right now:
 	[*] iOS arm package already done...
 	[*] iOS arm64 package already done...
 	[*] iOS appstore package already done...
+	[*] found radare2-w32-1.0.2.zip
+	[*] found radare2_1.0.2_amd64.deb
+	[*] found radare2_1.0.2_i686.deb
+	[*] found radare2-1.0.2.pkg
+	[*] found radare2-arm32_1.0.2_iphoneos-arm.deb
+	[*] found radare2_1.0.2_iphoneos-arm.deb
+	[*] found radare2-ios-arm64-1.0.2.tar.gz
 	[*] Computing checksums...
 	[*] Publishing Cydia packages...
 	[*] Building the android app...
@@ -49,6 +56,5 @@ What it builds right now:
 
 Future (aka TODO)
 -----------------
-* Update website taking credentials from `CONFIG`
 * Also release acr, valabind, ired and sdb
 * Sign releases

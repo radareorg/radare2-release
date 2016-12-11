@@ -164,6 +164,7 @@ grab_tarball() {(
 	[ -z "$ver" ] && ver="${VERSION}"
 	mkdir -p out/${VERSION}
 	cd out/${VERSION}
+	# TODO: use check here
 	if [ -f $pkg-${ver}.tar.gz ]; then
 		msg "Already got $pkg-${ver}.tar.gz"
 	else
