@@ -63,14 +63,13 @@ android_build() {(
 check() {
 	file="$1"
 	test -f "${CWD}/out/${VERSION}/${file}"
-	return $?
+	ret=$?
+	[ "$ret" = 0 ] && msg "found $file"
+	return ${ret}
 }
 
 osx_build() {(
-	if check radare2-${VERSION}.pkg ; then
-		msg "macOS package already done..."
-		return
-	fi
+	check radare2-${VERSION}.pkg && return
 	prepare radare2-${VERSION} tmp/osx-pkg
 	msg "Building macOS package..."
 	sys/osx-pkg.sh >> ${LOG}
@@ -80,10 +79,7 @@ osx_build() {(
 
 linux_build() {(
 	arch="`uname -m`"
-	if check radare2-${VERSION}-${arch}.deb ; then
-		msg "Linux package already done..."
-		return
-	fi
+	check radare2-${VERSION}-${arch}.deb && return
 	prepare radare2-${VERSION} tmp/osx-pkg
 	msg "Building Debain GNU/Linux package..."
 	sys/debian.sh >> ${LOG}
@@ -92,10 +88,7 @@ linux_build() {(
 
 docker_linux_build() {(
 	arch="$1"
-	if check radare2_${VERSION}_${arch}.deb ; then
-		msg "Linux ${arch} package already done..."
-		return
-	fi
+	check radare2_${VERSION}_${arch}.deb && return
 	cd docker-linux-${arch} || exit 1
 	make
 )}
@@ -103,10 +96,7 @@ docker_linux_build() {(
 ios_appstore() {(
 	arch="$1"
 	[ -z "$1" ] || arch="arm64"
-	if check radare2-ios-${arch}-${VERSION}.tar.gz ; then
-		msg "iOS appstore package already done..."
-		return
-	fi
+	check radare2-ios-${arch}-${VERSION}.tar.gz && return
 	prepare radare2-${VERSION} tmp/ios-appstore
 	msg "Building for the iOS appstore..."
 	sys/ios-static-appstore.sh >> ${LOG}
@@ -128,10 +118,7 @@ ios_build() {(
 		D=$O
 		DD=radare2-dev_$S
 	fi
-	if check $D ; then
-		msg "iOS ${arch} package already done..."
-		return
-	fi
+	check $D && return
 	prepare radare2-${VERSION} tmp/ios-cydia-${arch}
 	msg "Building ios-${arch}..."
 	$C >> ${LOG}
@@ -142,10 +129,7 @@ ios_build() {(
 )}
 
 w32_build() {(
-	if check radare2-w32-${VERSION}.zip ; then
-		msg "Mingw32 package already done..."
-		return
-	fi
+	check radare2-w32-${VERSION}.zip && return
 	prepare radare2-${VERSION} tmp/mingw32
 	msg "Building Debain GNU/Linux package..."
 	sys/mingw32.sh >> ${LOG}
@@ -153,10 +137,7 @@ w32_build() {(
 )}
 
 w64_build() {(
-	if check radare2-w64-${VERSION}.zip ; then
-		msg "Mingw64 package already done..."
-		return
-	fi
+	check radare2-w64-${VERSION}.zip && return
 	prepare radare2-${VERSION} tmp/mingw32
 	msg "Building Debain GNU/Linux package..."
 	sys/mingw64.sh >> ${LOG}
