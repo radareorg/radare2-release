@@ -13,11 +13,6 @@ esac
 download radare2
 download_others
 
-capstone() {(
-	cd tmp
-	git clone https://github.com/aquynh/capstone.git
-)}
-
 # TODO: dockerify
 android_build x86
 android_build mips
@@ -46,15 +41,16 @@ esac
 
 publish_checksums
 
-# populate all binaries
+### populate all binaries
 publish_cydia
 publish_out
-#publish_android
+publish_android
 
-# announce
+### announce
 publish_irc
 publish_www
 # publish_twitter
 # publish_telegram
+# publish_blog
 
 

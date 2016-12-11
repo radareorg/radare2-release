@@ -177,6 +177,7 @@ download_others() {(
 	grab_tarball radare2-extras ${VERSION_EXTRAS}
 	grab_tarball radare2-bindings ${VERSION_BNDNGS}
 	grab_tarball radare2-r2pipe ${VERSION_R2PIPE}
+	grab_tarball radare2-webui ${VERSION_WEBUI}
 )}
 
 android_app() {(

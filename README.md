@@ -50,4 +50,5 @@ What it builds right now:
 Future (aka TODO)
 -----------------
 * Update website taking credentials from `CONFIG`
+* Also release acr, valabind, ired and sdb
 * Sign releases
