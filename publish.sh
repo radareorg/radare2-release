@@ -5,9 +5,11 @@ publish_checksums() {(
 	sha1sum * > checksums.sha1sum
 )}
 
-publish_irc() {
+publish_irc() {(
 	msg "Updating IRC channel title..."
-}
+	cd irctitle
+	make
+)}
 
 generate_web_config() {
 	O="$1"
