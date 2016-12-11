@@ -2,8 +2,7 @@
 
 alias include=.
 
-VERSION=1.0.2
-
+include CONFIG
 include build.sh
 include publish.sh
 
