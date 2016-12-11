@@ -9,6 +9,7 @@ Dependencies
 * Docker. Required to build the debian packages for amd64 and i686
 * NDK (for the android builds), eventually dockerified
 * make and sh
+* rsync to publish the bins
 
 Usage
 -----
@@ -35,6 +36,13 @@ What it builds right now:
 	[*] iOS arm64 package already done...
 	[*] iOS appstore package already done...
 	[*] Computing checksums...
+	[*] Publishing Cydia packages...
+	[*] Building the android app...
+	[*] Publishing Android binaries...
+	[*] Already published 1.0.2 android build for radare2-x86
+	[*] Already published 1.0.2 android build for radare2-arm
+	[*] Already published 1.0.2 android build for radare2-mips
+	[*] Already published 1.0.2 android build for radare2-aarch64
 	[*] Updating IRC channel title...
 	[*] Updating the website...
 
@@ -42,7 +50,4 @@ What it builds right now:
 Future (aka TODO)
 -----------------
 * Update website taking credentials from `CONFIG`
-* Find a better home to store those 120MB per release
-* Releases will be published in versioned directory names
-* Update the https://github.com/radare/radare2-bin repository
 * Sign releases

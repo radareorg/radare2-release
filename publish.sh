@@ -10,8 +10,22 @@ publish_irc() {
 }
 
 publish_www() {
-	msg "Updating the website..."
+	msg "Updating the website"
 }
+
+publish_out() {
+	msg "Publishing the binaries..."
+	rsync --rsh="ssh -p ${OUT_SSH_PORT}" -avz out/${VERSION} ${OUT_SSH_PATH}
+}
+
+publish_cydia() {(
+	msg "Publishing Cydia packages..."
+	rsync -avz --rsh="ssh -p ${CYDIA_PORT}" \
+		out/${VERSION}/radare2_${VERSION}_iphoneos-arm.deb \
+		out/${VERSION}/radare2-arm32_${VERSION}_iphoneos-arm.deb \
+		${CYDIA_PATH}
+	msg "TODO: You should now remove the old deb packages and rebuild the package database by hand"
+)}
 
 publish_android_bin() {(
 	arch="$1"
@@ -54,5 +68,4 @@ publish_android() {(
 	publish_android_bin arm
 	publish_android_bin mips
 	publish_android_bin aarch64
-	ls
 )}

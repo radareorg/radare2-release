@@ -178,3 +178,15 @@ download_others() {(
 	grab_tarball radare2-bindings ${VERSION_BNDNGS}
 	grab_tarball radare2-r2pipe ${VERSION_R2PIPE}
 )}
+
+android_app() {(
+	if [ -d ../radare2-installer ]; then
+		msg "Building the android app..."
+		cd ../radare2-installer
+		make >> ${LOG}
+		mkdir -p out/${VERSION}
+		cp -f org.radare.radare2installer.apk ${OLDPWD}/out/${VERSION} || msg "Cannot find the apk"
+	else
+		msg "Cannot find ../radare2-installer to build the android app"
+	fi
+)}
