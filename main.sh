@@ -53,3 +53,5 @@ publish_checksums
 publish_irc
 publish_www
 
+publish_android
+
