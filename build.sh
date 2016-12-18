@@ -81,7 +81,7 @@ linux_build() {(
 	arch="`uname -m`"
 	check radare2-${VERSION}-${arch}.deb && return
 	prepare radare2-${VERSION} tmp/osx-pkg
-	msg "Building Debain GNU/Linux package..."
+	msg "Building Debian GNU/Linux package..."
 	sys/debian.sh >> ${LOG}
 	output sys/debian/radare2/*.deb
 )}
@@ -89,8 +89,22 @@ linux_build() {(
 docker_linux_build() {(
 	arch="$1"
 	check radare2_${VERSION}_${arch}.deb && return
-	cd docker-linux-${arch} || exit 1
-	make
+	cd tmp/radare*
+#	${CWD}/dockcross --image dockcross/linux-${arch} ./configure --with-compiler=${arch} --host=${arch}
+	${CWD}/dockcross --image dockcross/linux-${arch} sys/build.sh
+	${CWD}/dockcross --image dockcross/linux-${arch} sys/debian.sh
+)}
+
+docker_windows_build() {(
+	arch="$1"
+	cd tmp/radare*
+	if [ "${arch}" = "x86_64-w64-mingw32.static-gcc" ]; then
+		${CWD}/dockcross --image dockcross/windows-x64 ./configure --with-compiler=${arch} --host=${arch}
+		${CWD}/dockcross --image dockcross/windows-x64 make
+	else
+		${CWD}/dockcross --image dockcross/windows-x86 ./configure --with-compiler=${arch} --host=${arch}
+		${CWD}/dockcross --image dockcross/windows-x86 make
+	fi
 )}
 
 ios_appstore() {(
