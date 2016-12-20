@@ -18,6 +18,10 @@ generate_web_config() {
 	echo '$radare2_date='${RELEASE_DATE} >> $O
 	echo '$radare2_sha1='`sha1sum ../../out/${VERSION}/radare2-${VERSION}.tar.gz | cut -d ' ' -f 1` >> $O
 
+	echo '$radare2_r2pipe_version='${VERSION_R2PIPE} >> $O
+	echo '$radare2_r2pipe_date='${RELEASE_DATE} >> $O
+	echo '$radare2_r2pipe_sha1='`sha1sum ../../out/${VERSION}/radare2-r2pipe-${VERSION_R2PIPE}.tar.gz | cut -d ' ' -f 1` >> $O
+
 	echo '$radare2_bindings_version='${VERSION_BNDNGS} >> $O
 	echo '$radare2_bindings_date='${RELEASE_DATE} >> $O
 	echo '$radare2_bindings_sha1='`sha1sum ../../out/${VERSION}/radare2-bindings-${VERSION_BNDNGS}.tar.gz | cut -d ' ' -f 1` >> $O
