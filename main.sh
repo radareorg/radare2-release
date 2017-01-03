@@ -30,7 +30,7 @@ Darwin)
 	osx_build
 	ios_build arm
 	ios_build arm64
-	# ios_appstore arm
+	ios_appstore arm
 	ios_appstore arm64
 	;;
 Linux)
