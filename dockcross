@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 DEFAULT_DOCKCROSS_IMAGE=dockcross/linux-armv5
 
@@ -6,7 +6,7 @@ DEFAULT_DOCKCROSS_IMAGE=dockcross/linux-armv5
 # Helpers
 #
 err() {
-    echo -e >&2 ERROR: $@\\n
+    echo >&2 ERROR: $@\\n
 }
 
 die() {
@@ -25,37 +25,33 @@ has() {
 #------------------------------------------------------------------------------
 # Command handlers
 #
-command:update-image() {
+command_update_image() {
     docker pull $FINAL_IMAGE
 }
 
-help:update-image() {
-    echo Pull the latest $FINAL_IMAGE .
+help_update_image() {
+    echo "Pull the latest $FINAL_IMAGE ."
 }
 
-command:update-script() {
-    if cmp -s <( docker run $FINAL_IMAGE ) $0; then
-        echo $0 is up to date
+command_update_script() {
+    if [ docker run $FINAL_IMAGE | cmp -s $0 ]; then
+        echo "$0 is up to date"
     else
-        echo -n Updating $0 '... '
+        printf "Updating $0 '... '"
         docker run $FINAL_IMAGE > $0 && echo ok
     fi
 }
 
-help:update-image() {
-    echo Update $0 from $FINAL_IMAGE .
+command_update() {
+	command_update_image
+	command_update_script
 }
 
-command:update() {
-    command:update-image
-    command:update-script
+help_update() {
+    echo "Pull the latest $FINAL_IMAGE, and then update $0 from that."
 }
 
-help:update() {
-    echo Pull the latest $FINAL_IMAGE, and then update $0 from that.
-}
-
-command:help() {
+command_help() {
     if [[ $# != 0 ]]; then
         if ! has command $1; then
             err \"$1\" is not an dockcross command

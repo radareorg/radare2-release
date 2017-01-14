@@ -86,6 +86,12 @@ linux_build() {(
 	output sys/debian/radare2/*.deb
 )}
 
+docker_android_build() {(
+	arch="$1"
+	${CWD}/dockcross --image dockcross/android-${arch} ./tmp/radare2-${VERSION}/configure --with-compiler=${arch} --host="android"
+	${CWD}/dockcross --image dockcross/android-${arch} ./tmp/radare2-${VERSION}/sys/build.sh
+)}
+
 docker_linux_build() {(
 	arch="$1"
 	check radare2_${VERSION}_${arch}.deb && return
