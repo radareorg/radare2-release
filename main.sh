@@ -8,6 +8,11 @@ case "$1" in
 -h|help)
 	echo "Usage: make [release|init|...]"
 	;;
+-js)
+	download radare2
+	docker_asmjs_build
+	exit 0
+	;;
 esac
 
 download radare2

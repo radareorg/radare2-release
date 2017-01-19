@@ -101,6 +101,14 @@ docker_linux_build() {(
 	${CWD}/dockcross --image dockcross/linux-${arch} sys/debian.sh
 )}
 
+docker_asmjs_build() {(
+	arch="$1"
+	#check radare2_${VERSION}_${arch}.deb && return
+	cd tmp/radare*
+	#${CWD}/dockcross --image dockcross/browser-asmjs bash
+	${CWD}/dockcross --image dockcross/browser-asmjs sys/emscripten.sh
+)}
+
 docker_windows_build() {(
 	arch="$1"
 	cd tmp/radare*
