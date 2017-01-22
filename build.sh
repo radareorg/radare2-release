@@ -49,15 +49,25 @@ download() {(
 
 android_build() {(
 	arch="$1"
-	if [ -f "out/${VERSION}/radare2-${VERSION}-android-${arch}.tar.gz" ]; then
-		msg "radare2-${VERSION}-android-${arch} is already done"
-		return
-	fi
-	prepare radare2-${VERSION} tmp/android-${arch}
-	msg "Building android-${arch}..."
-	:> libr/libr.a
-	sys/"android-${arch}.sh" >> ${LOG}
-	output radare2-${VERSION}-android-${arch}.tar.gz 
+	mode="$2"
+	mkdir -p tmp
+	case "$mode" in
+	shell|bash|sh)
+		prepare radare2-${VERSION} tmp/android-${arch}
+		sys/android-shell.sh $arch
+		;;
+	*)
+		if [ -f "out/${VERSION}/radare2-${VERSION}-android-${arch}.tar.gz" ]; then
+			msg "radare2-${VERSION}-android-${arch} is already done"
+			return
+		fi
+		prepare radare2-${VERSION} tmp/android-${arch}
+		msg "Building android-${arch}..."
+		:> libr/libr.a
+		sys/"android-${arch}.sh" >> ${LOG}
+		output radare2-${VERSION}-android-${arch}.tar.gz 
+		;;
+	esac
 )}
 
 check() {
@@ -69,56 +79,119 @@ check() {
 }
 
 osx_build() {(
-	check radare2-${VERSION}.pkg && return
-	prepare radare2-${VERSION} tmp/osx-pkg
-	msg "Building macOS package..."
-	sys/osx-pkg.sh >> ${LOG}
-	ls sys/osx-pkg
-	output sys/osx-pkg/radare2-${VERSION}.pkg
+	if [ "`uname`" != "Darwin" ]; then
+		echo "osx_build is only suposed to run on macOS"
+		return 1
+	fi
+	mode="$2"
+	case "$mode" in
+	shell|sh|bash)
+		prepare radare2-${VERSION} tmp/osx-pkg
+		bash
+		;;
+	*)
+		check radare2-${VERSION}.pkg && return
+		prepare radare2-${VERSION} tmp/osx-pkg
+		msg "Building macOS package..."
+		sys/osx-pkg.sh >> ${LOG}
+		ls sys/osx-pkg
+		output sys/osx-pkg/radare2-${VERSION}.pkg
+		;;
+	esac
 )}
 
 linux_build() {(
 	arch="`uname -m`"
-	check radare2-${VERSION}-${arch}.deb && return
-	prepare radare2-${VERSION} tmp/osx-pkg
-	msg "Building Debian GNU/Linux package..."
-	sys/debian.sh >> ${LOG}
-	output sys/debian/radare2/*.deb
+	mode="$2"
+	case "$mode" in
+	shell|bash|sh)
+		prepare radare2-${VERSION} tmp/osx-pkg
+		bash
+		;;
+	*)
+		check radare2-${VERSION}-${arch}.deb && return
+		prepare radare2-${VERSION} tmp/osx-pkg
+		msg "Building Debian GNU/Linux package..."
+		sys/debian.sh >> ${LOG}
+		output sys/debian/radare2/*.deb
+		;;
+	esac
 )}
 
 docker_android_build() {(
 	arch="$1"
-	${CWD}/dockcross --image dockcross/android-${arch} ./tmp/radare2-${VERSION}/configure --with-compiler=${arch} --host="android"
+	mode="$2"
+	case "$mode" in
+	shell|bash|sh)
+		${CWD}/dockcross --image dockcross/android-${arch} bash
+		;;
+	*|static)
+		${CWD}/dockcross --image dockcross/android-${arch} ./tmp/radare2-${VERSION}/configure --with-compiler=${arch} --host="android"
+		;;
+	esac
 	${CWD}/dockcross --image dockcross/android-${arch} ./tmp/radare2-${VERSION}/sys/build.sh
 )}
 
 docker_linux_build() {(
 	arch="$1"
+	arg="$2"
 	check radare2_${VERSION}_${arch}.deb && return
 	cd tmp/radare*
 #	${CWD}/dockcross --image dockcross/linux-${arch} ./configure --with-compiler=${arch} --host=${arch}
-	${CWD}/dockcross --image dockcross/linux-${arch} sys/build.sh
-	${CWD}/dockcross --image dockcross/linux-${arch} sys/debian.sh
+	case "$arg" in
+	static)
+		${CWD}/dockcross --image dockcross/linux-${arch} sys/build.sh --without-pic --with-nonpic
+		${CWD}/dockcross --image dockcross/linux-${arch} sys/debian.sh
+		;;
+	shell|bash|sh)
+		${CWD}/dockcross --image dockcross/linux-${arch} bash
+		;;
+	*)
+		${CWD}/dockcross --image dockcross/linux-${arch} sys/build.sh
+		${CWD}/dockcross --image dockcross/linux-${arch} sys/debian.sh
+		;;
+	esac
 )}
 
 docker_asmjs_build() {(
 	arch="$1"
-	#check radare2_${VERSION}_${arch}.deb && return
+	mode="$2"
+	[ -z "$arch" ] && arch="asmjs"
+	X=${repo}-${vers}-${arch}
+	check "$X".tar.gz && return
 	cd tmp/radare*
-	#${CWD}/dockcross --image dockcross/browser-asmjs bash
-	${CWD}/dockcross --image dockcross/browser-asmjs sys/emscripten.sh
+	case "$mode" in
+	shell|bash|sh)
+		${CWD}/dockcross --image dockcross/browser-asmjs bash
+		;;
+	*)
+		${CWD}/dockcross --image dockcross/browser-asmjs sys/emscripten.sh
+		rm -rf "$X"
+		mkdir -p "$X"
+		cp -f binr/*/*.js "$X"
+		tar czf "$X".tar.gz "$X"
+		output "$X".tar.gz
+		;;
+	esac
 )}
 
 docker_windows_build() {(
 	arch="$1"
+	mode="$2"
 	cd tmp/radare*
-	if [ "${arch}" = "x86_64-w64-mingw32.static-gcc" ]; then
-		${CWD}/dockcross --image dockcross/windows-x64 ./configure --with-compiler=${arch} --host=${arch}
-		${CWD}/dockcross --image dockcross/windows-x64 make
-	else
-		${CWD}/dockcross --image dockcross/windows-x86 ./configure --with-compiler=${arch} --host=${arch}
-		${CWD}/dockcross --image dockcross/windows-x86 make
-	fi
+	case "$mode" in
+	shell|sh|bash)
+		${CWD}/dockcross --image dockcross/windows-x64 bash
+		;;
+	*)
+		if [ "${arch}" = "x86_64-w64-mingw32.static-gcc" ]; then
+			${CWD}/dockcross --image dockcross/windows-x64 ./configure --with-compiler=${arch} --host=${arch}
+			${CWD}/dockcross --image dockcross/windows-x64 make
+		else
+			${CWD}/dockcross --image dockcross/windows-x86 ./configure --with-compiler=${arch} --host=${arch}
+			${CWD}/dockcross --image dockcross/windows-x86 make
+		fi
+	esac
 )}
 
 ios_appstore() {(
@@ -135,6 +208,14 @@ ios_appstore() {(
 
 ios_build() {(
 	arch="$1"
+	mode="$2"
+	case "$mode" in
+	shell|sh|bash)
+		prepare radare2-${VERSION} tmp/ios-cydia-${arch}
+		sys/ios-sdk.sh -s
+		exit 0
+		;;
+	esac
 	S=${VERSION}_iphoneos-arm.deb
 	O=radare2_${S}
 	if [ "${arch}" = "arm" ]; then
@@ -157,6 +238,12 @@ ios_build() {(
 )}
 
 w32_build() {(
+	arch="$1"
+	mode="$2"
+	if [ "$arch" = x64 ]; then
+		return w64_build $arch $mode
+	fi
+	
 	check radare2-w32-${VERSION}.zip && return
 	prepare radare2-${VERSION} tmp/mingw32
 	msg "Building Debain GNU/Linux package..."
@@ -165,6 +252,11 @@ w32_build() {(
 )}
 
 w64_build() {(
+	arch="$1"
+	mode="$2"
+	if [ "$arch" = x86 ]; then
+		return w32_build $arch $mode
+	fi
 	check radare2-w64-${VERSION}.zip && return
 	prepare radare2-${VERSION} tmp/mingw32
 	msg "Building Debain GNU/Linux package..."
@@ -174,8 +266,8 @@ w64_build() {(
 
 depends() {
 	if [ ! -d "$1" ]; then
-		git clone https://github.com/radare/$1
-		wget https://github.com/radare/radare2/archive/1.0.2.tar.gz
+		git clone --depth 20 https://github.com/radare/$1
+		wget -c https://github.com/radare/radare2/archive/${VERSION}.tar.gz
 	else
 		(
 		cd "$1"

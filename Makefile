@@ -1,5 +1,5 @@
 all: CONFIG
-	@$(SHELL) main.sh
+	@$(SHELL) main.sh -a
 
 CONFIG:
 	cp -f CONFIG.def CONFIG
