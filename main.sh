@@ -10,6 +10,30 @@ case "$1" in
 	# cut -d '(' -f 1
 	exit 0
 	;;
+-ll)
+	echo "
+android:
+	x86
+	mips
+	arm
+	aarch64
+
+linux:
+	armv5
+	armv6
+	armv7
+	arm64
+	mipsel
+
+windows:
+	x86
+	x65
+
+ios:
+	armv7
+	arm64
+"
+	;;
 -js)
 	download radare2
 	docker_asmjs_build
@@ -26,9 +50,10 @@ case "$1" in
 -h|help|*)
 	echo "Usage: ./main.sh [release|init|...]"
 	echo " -a                          release all default targets"
-	echo " -l                          list all targets usable via -x"
+	echo " -l                          list build targets usable via -x"
+	echo " -ll                         list arch targets"
 	echo " -x [target] [arch] [mode]   run the build.sh target for given"
-	echo " -js                         build for asmjs"
+	echo " -js                         build for asmjs (EXPERIMENTAL)"
 	echo
 	echo "Android NDK for ARM shell"
 	echo "  ./main.sh -x docker_android arm shell"
