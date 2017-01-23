@@ -166,9 +166,18 @@ ANDROID_PREFIX="/data/data/org.radare.radare2installer/radare2"
 docker_linux_build() {(
 	arch="$1"
 	arg="$2"
-	check radare2_${VERSION}_${arch}.deb && return
+	[ -z "$arch" ] && arch="x86"
+	debarch="$arch"
+	case "$arch" in
+	x86)
+		debarch="i686"
+		;;
+	x64)
+		debarch="amd64"
+		;;
+	esac
+	check radare2_${VERSION}_${debarch}.deb && return
 	cd tmp/radare*
-#	${CWD}/dockcross --image dockcross/linux-${arch} ./configure --with-compiler=${arch} --host=${arch}
 	case "$arg" in
 	static)
 		${CWD}/dockcross --image dockcross/linux-${arch} sys/build.sh --without-pic --with-nonpic
@@ -179,6 +188,7 @@ docker_linux_build() {(
 		${CWD}/dockcross --image dockcross/linux-${arch} bash
 		;;
 	*)
+		${CWD}/dockcross --image dockcross/linux-${arch} ./configure --with-compiler=${arch} --host=${arch}
 		${CWD}/dockcross --image dockcross/linux-${arch} sys/build.sh
 		${CWD}/dockcross --image dockcross/linux-${arch} sys/debian.sh
 		output sys/debian/radare2/*.deb
