@@ -207,13 +207,14 @@ docker_asmjs_build() {(
 	mode="$2"
 	[ -z "$arch" ] && arch="asmjs"
 	X=radare2-${VERSION}-${arch}
-	check "$X".tar.gz && return
-	prepare radare2-${VERSION} tmp/radare2-asmjs noclean
 	case "$mode" in
 	shell|bash|sh)
+		prepare radare2-${VERSION} tmp/radare2-asmjs noclean
 		${CWD}/dockcross --image dockcross/browser-asmjs bash
 		;;
 	*)
+		check "$X".tar.gz && return
+		prepare radare2-${VERSION} tmp/radare2-asmjs noclean
 		${CWD}/dockcross --image dockcross/browser-asmjs sys/emscripten.sh
 		rm -rf "$X"
 		mkdir -p "$X"
