@@ -1,6 +1,8 @@
 CWD="${PWD}"
 LOG="${CWD}/log.txt"
 
+
+mkdir -p tmp out
 msg() {
 	echo "\033[32m[*] $@\033[0m"
 }
@@ -15,6 +17,9 @@ prepare() {
 	namver="$1"
 	wrkdir="$2"
 	action="$3"
+	if [ ! -f "tmp/${namver}.tar.gz" ]; then
+		download radare2
+	fi
 	msg "Preparing ${namver} in ${wrkdir}..."
 	case "$action" in
 	noclean)
@@ -24,11 +29,12 @@ prepare() {
 		;;
 	*)
 		if [ ! -d "${wrkdir}" ]; then
+			mkdir -p "${wrkdir}"
 			tar xzf "tmp/${namver}.tar.gz" -C "${wrkdir}" || exit 1
 		fi
 		;;
 	esac
-	cd "${wrkdir}/${namver}"
+	cd "${wrkdir}/${namver}" || exit 1
 }
 
 download() {(
@@ -143,7 +149,7 @@ ANDROID_PREFIX="/data/data/org.radare.radare2installer/radare2"
 		;;
 	*|static)
 		check radare2-${VERSION}-android-${arch}.tar.gz && return
-		prepare radare2-${VERSION} tmp/android-${arch} clean
+		prepare radare2-${VERSION} tmp/android-${arch}
 		# ${CWD}/dockcross --image dockcross/android-${arch} su -c 'apt install -y pax'
 		#--with-compiler=android
 		${CWD}/dockcross --image dockcross/android-${arch} \
@@ -177,7 +183,7 @@ docker_linux_build() {(
 		;;
 	esac
 	check radare2_${VERSION}_${debarch}.deb && return
-	cd tmp/radare*
+	prepare radare2-${VERSION} tmp
 	case "$arg" in
 	static)
 		${CWD}/dockcross --image dockcross/linux-${arch} sys/build.sh --without-pic --with-nonpic
@@ -286,7 +292,6 @@ w32_build() {(
 	if [ "$arch" = x64 ]; then
 		return w64_build $arch $mode
 	fi
-	
 	check radare2-w32-${VERSION}.zip && return
 	prepare radare2-${VERSION} tmp/mingw32
 	msg "Building Debain GNU/Linux package..."
