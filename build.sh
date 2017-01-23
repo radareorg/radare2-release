@@ -206,7 +206,7 @@ docker_asmjs_build() {(
 	arch="$1"
 	mode="$2"
 	[ -z "$arch" ] && arch="asmjs"
-	X=${repo}-${vers}-${arch}
+	X=radare2-${VERSION}-${arch}
 	check "$X".tar.gz && return
 	prepare radare2-${VERSION} tmp/radare2-asmjs noclean
 	case "$mode" in
