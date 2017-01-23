@@ -25,6 +25,11 @@ linux:
 	arm64
 	mipsel
 
+osx:
+	x86_64
+	i686
+	ppc
+
 windows:
 	x86
 	x65
