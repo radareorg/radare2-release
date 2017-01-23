@@ -106,7 +106,7 @@ ios:
 -a)
 	release_all
 	;;
--h|help|*)
+-h|help|'')
 	echo "Usage: ./main.sh [release|init|...]"
 	echo " -a                          release all default targets"
 	echo " -l                          list build targets usable via -x"
@@ -119,6 +119,10 @@ ios:
 	echo "Emscripten shell:"
 	echo " ./main.sh -x docker_asmjs - shell"
 	exit 0
+	;;
+*)
+	target=`echo "$1" | sed -e s,-,_,g`
+	${target}_build $2 $3
 	;;
 esac
 
