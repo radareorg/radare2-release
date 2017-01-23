@@ -14,10 +14,20 @@ output() {(
 prepare() {
 	namver="$1"
 	wrkdir="$2"
+	action="$3"
 	msg "Preparing ${namver} in ${wrkdir}..."
-	rm -rf "${wrkdir}"
-	mkdir -p "${wrkdir}"
-	tar xzf "tmp/${namver}.tar.gz" -C "${wrkdir}" || exit 1
+	case "$action" in
+	noclean)
+		rm -rf "${wrkdir}"
+		mkdir -p "${wrkdir}"
+		tar xzf "tmp/${namver}.tar.gz" -C "${wrkdir}" || exit 1
+		;;
+	*)
+		if [ ! -d "${wrkdir}" ]; then
+			tar xzf "tmp/${namver}.tar.gz" -C "${wrkdir}" || exit 1
+		fi
+		;;
+	esac
 	cd "${wrkdir}/${namver}"
 }
 
@@ -54,18 +64,15 @@ android_build() {(
 	case "$mode" in
 	shell|bash|sh)
 		prepare radare2-${VERSION} tmp/android-${arch}
-		sys/android-shell.sh $arch
+		sys/android-shell.sh ${arch}
 		;;
 	*)
-		if [ -f "out/${VERSION}/radare2-${VERSION}-android-${arch}.tar.gz" ]; then
-			msg "radare2-${VERSION}-android-${arch} is already done"
-			return
-		fi
+		check radare2-${VERSION}-android-${arch}.tar.gz && return
 		prepare radare2-${VERSION} tmp/android-${arch}
 		msg "Building android-${arch}..."
 		:> libr/libr.a
 		sys/"android-${arch}.sh" >> ${LOG}
-		output radare2-${VERSION}-android-${arch}.tar.gz 
+		output radare2-${VERSION}-android-${arch}.tar.gz
 		;;
 	esac
 )}
@@ -121,15 +128,39 @@ linux_build() {(
 docker_android_build() {(
 	arch="$1"
 	mode="$2"
+ANDROID_PREFIX="/data/data/org.radare.radare2installer/radare2"
 	case "$mode" in
 	shell|bash|sh)
+		prepare radare2-${VERSION} tmp/android-${arch}
+		${CWD}/dockcross --image dockcross/android-${arch} \
+			./configure \
+				--host="linux-android-${arch}" \
+				--with-ostype=android \
+				--without-pic --with-nonpic \
+				--prefix=${ANDROID_PREFIX}
 		${CWD}/dockcross --image dockcross/android-${arch} bash
+		# sys/android-shell.sh $arch
 		;;
 	*|static)
-		${CWD}/dockcross --image dockcross/android-${arch} ./tmp/radare2-${VERSION}/configure --with-compiler=${arch} --host="android"
+		check radare2-${VERSION}-android-${arch}.tar.gz && return
+		prepare radare2-${VERSION} tmp/android-${arch} clean
+		# ${CWD}/dockcross --image dockcross/android-${arch} su -c 'apt install -y pax'
+		#--with-compiler=android
+		${CWD}/dockcross --image dockcross/android-${arch} \
+			./configure \
+				--host="linux-android-${arch}" \
+				--with-ostype=android \
+				--without-pic --with-nonpic \
+				--prefix=${ANDROID_PREFIX}
+		${CWD}/dockcross --image dockcross/android-${arch} touch binr/preload/libr2.so
+		${CWD}/dockcross --image dockcross/android-${arch} \
+			make -s -j 4 ANDROID=1 || return 1
+		${CWD}/dockcross --image dockcross/android-${arch} \
+			bash -c "ANDROID=1 BUILD=0 sys/android-${arch}.sh" || return 1
+		#${CWD}/dockcross --image dockcross/android-${arch} sys/"android-${arch}.sh" >> ${LOG}
+		output radare2-${VERSION}-android-${arch}.tar.gz 
 		;;
 	esac
-	${CWD}/dockcross --image dockcross/android-${arch} ./tmp/radare2-${VERSION}/sys/build.sh
 )}
 
 docker_linux_build() {(
