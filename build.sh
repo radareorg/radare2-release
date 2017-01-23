@@ -112,12 +112,12 @@ linux_build() {(
 	mode="$2"
 	case "$mode" in
 	shell|bash|sh)
-		prepare radare2-${VERSION} tmp/osx-pkg
+		prepare radare2-${VERSION} tmp/linux-${arch}
 		bash
 		;;
 	*)
 		check radare2-${VERSION}-${arch}.deb && return
-		prepare radare2-${VERSION} tmp/osx-pkg
+		prepare radare2-${VERSION} tmp/linux-${arch}
 		msg "Building Debian GNU/Linux package..."
 		sys/debian.sh >> ${LOG}
 		output sys/debian/radare2/*.deb
@@ -173,6 +173,7 @@ docker_linux_build() {(
 	static)
 		${CWD}/dockcross --image dockcross/linux-${arch} sys/build.sh --without-pic --with-nonpic
 		${CWD}/dockcross --image dockcross/linux-${arch} sys/debian.sh
+		output sys/debian/radare2/*.deb
 		;;
 	shell|bash|sh)
 		${CWD}/dockcross --image dockcross/linux-${arch} bash
@@ -180,6 +181,7 @@ docker_linux_build() {(
 	*)
 		${CWD}/dockcross --image dockcross/linux-${arch} sys/build.sh
 		${CWD}/dockcross --image dockcross/linux-${arch} sys/debian.sh
+		output sys/debian/radare2/*.deb
 		;;
 	esac
 )}

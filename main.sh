@@ -84,6 +84,7 @@ release_all() {
 	docker_linux_build x64
 
 	docker_linux_build armv5
+	# rpi? must test
 	#docker_linux_build armv6
 	#docker_linux_build armv7
 	#docker_linux_build armv64
