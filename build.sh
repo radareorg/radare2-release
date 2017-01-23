@@ -23,15 +23,15 @@ prepare() {
 	msg "Preparing ${namver} in ${wrkdir}..."
 	case "$action" in
 	noclean)
-		rm -rf "${wrkdir}"
-		mkdir -p "${wrkdir}"
-		tar xzf "tmp/${namver}.tar.gz" -C "${wrkdir}" || exit 1
-		;;
-	*)
 		if [ ! -d "${wrkdir}" ]; then
 			mkdir -p "${wrkdir}"
 			tar xzf "tmp/${namver}.tar.gz" -C "${wrkdir}" || exit 1
 		fi
+		;;
+	*)
+		rm -rf "${wrkdir}"
+		mkdir -p "${wrkdir}"
+		tar xzf "tmp/${namver}.tar.gz" -C "${wrkdir}" || exit 1
 		;;
 	esac
 	cd "${wrkdir}/${namver}" || exit 1
