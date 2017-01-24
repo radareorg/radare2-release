@@ -60,7 +60,7 @@ command_help() {
             err No help found for \"$1\"
         else
             help:$1
-	fi
+    fi
     else
         cat >&2 <<ENDHELP
 Usage: dockcross [options] [--] command [args]
@@ -83,7 +83,7 @@ Additionally, there are special update commands:
 For update command help use: $0 help <command>
 ENDHELP
         exit 1
-	fi
+    fi
 }
 
 #------------------------------------------------------------------------------
