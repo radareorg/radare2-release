@@ -1,8 +1,8 @@
 #!/bin/sh
 
-. CONFIG
-. build.sh
-. publish.sh
+. ./CONFIG
+. ./build.sh
+. ./publish.sh
 
 release_all() {
 	download radare2
