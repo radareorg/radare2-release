@@ -1,5 +1,8 @@
 #!/bin/sh
 
+if [ ! -f CONFIG ]; then
+	cp -f CONFIG.def CONFIG
+fi
 . ./CONFIG
 . ./build.sh
 . ./publish.sh
