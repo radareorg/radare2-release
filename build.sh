@@ -296,6 +296,7 @@ ios_build() {(
 w32_build() {(
 	arch="$1"
 	mode="$2"
+	[ -z "$arch" ] && arch="x86"
 	if [ "$arch" = x64 ]; then
 		return w64_build $arch $mode
 	fi
@@ -309,6 +310,7 @@ w32_build() {(
 w64_build() {(
 	arch="$1"
 	mode="$2"
+	[ -z "$arch" ] && arch="x64"
 	if [ "$arch" = x86 ]; then
 		return w32_build $arch $mode
 	fi
