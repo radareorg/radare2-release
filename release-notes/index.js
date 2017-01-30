@@ -357,6 +357,7 @@ function main() {
   console.log('Date: ' + new Date().toString());
   console.log('Website: http://radare.org');
   console.log('Tarball: https://github.com/radare/radare2/releases');
+  console.log('Builds: http://cloud.rada.re/get/' + curVersion);
   console.log();
 
   for (let onePath of paths) {

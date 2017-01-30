@@ -1,5 +1,8 @@
 #!/bin/sh
 
+if [ ! -f CONFIG ]; then
+	cp -f CONFIG.def CONFIG
+fi
 . ./CONFIG
 . ./build.sh
 . ./publish.sh
@@ -101,6 +104,29 @@ ios:
 -wasm)
 	download radare2
 	docker_wasm_build
+-deb)
+	docker_linux_build x86
+	docker_linux_build x64
+	;;
+-ios)
+	download radare2
+	ios_build arm
+	ios_build arm64
+	ios_appstore arm
+	ios_appstore arm64
+	exit 0
+	;;
+-w32)
+	download radare2
+	w32_build x86
+	w64_build x64
+	#docker_windows_build x86_64-w64-mingw32.static-gcc
+	#docker_windows_build i686-w64-mingw32.static-gcc
+	exit 0
+	;;
+-osx)
+	download radare2
+	osx_build
 	exit 0
 	;;
 -x)
@@ -108,16 +134,31 @@ ios:
 	${target}_build $3 $4
 	exit 0
 	;;
+-pi)
+	publish_irc
+	;;
+-pc)
+	publish_cydia
+	;;
+-pw)
+	publish_www
+	;;
+-p)
+	publish_out
+	;;
 -a)
 	release_all
 	;;
 -h|help|'')
 	echo "Usage: ./main.sh [release|init|...]"
 	echo " -a                          release all default targets"
+	echo " -p                          publish out directory"
+	echo " -pw                         publish into radare.org"
+	echo " -pi                         update IRC title"
 	echo " -l                          list build targets usable via -x"
 	echo " -ll                         list arch targets"
 	echo " -x [target] [arch] [mode]   run the build.sh target for given"
-	echo " -js                         build for asmjs (EXPERIMENTAL)"
+	echo " -js, -ios, -osx             build for asmjs, iOS/OSX .. (EXPERIMENTAL)"
 	echo " -wasm                       build for web assembly (EXPERIMENTAL)"
 	echo
 	echo "Android NDK for ARM shell"

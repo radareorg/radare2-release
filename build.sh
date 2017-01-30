@@ -69,12 +69,12 @@ android_build() {(
 	mkdir -p tmp
 	case "$mode" in
 	shell|bash|sh)
-		prepare radare2-${VERSION} tmp/android-${arch}
+		prepare radare2-${VERSION} tmp/android-${arch} noclean
 		sys/android-shell.sh ${arch}
 		;;
 	*)
 		check radare2-${VERSION}-android-${arch}.tar.gz && return
-		prepare radare2-${VERSION} tmp/android-${arch}
+		prepare radare2-${VERSION} tmp/android-${arch} noclean
 		msg "Building android-${arch}..."
 		:> libr/libr.a
 		sys/"android-${arch}.sh" >> ${LOG}
@@ -149,9 +149,7 @@ ANDROID_PREFIX="/data/data/org.radare.radare2installer/radare2"
 		;;
 	*|static)
 		check radare2-${VERSION}-android-${arch}.tar.gz && return
-		prepare radare2-${VERSION} tmp/android-${arch}
-		# ${CWD}/dockcross --image dockcross/android-${arch} su -c 'apt install -y pax'
-		#--with-compiler=android
+		prepare radare2-${VERSION} tmp/android-${arch} noclean
 		${CWD}/dockcross --image dockcross/android-${arch} \
 			./configure \
 				--host="linux-android-${arch}" \
@@ -163,8 +161,8 @@ ANDROID_PREFIX="/data/data/org.radare.radare2installer/radare2"
 			make -s -j 4 ANDROID=1 || return 1
 		${CWD}/dockcross --image dockcross/android-${arch} \
 			bash -c "ANDROID=1 BUILD=0 sys/android-${arch}.sh" || return 1
-		#${CWD}/dockcross --image dockcross/android-${arch} sys/"android-${arch}.sh" >> ${LOG}
-		output radare2-${VERSION}-android-${arch}.tar.gz 
+		${CWD}/dockcross --image dockcross/android-${arch} sys/"android-${arch}.sh" >> ${LOG}
+		output radare2-${VERSION}-android-${arch}.tar.gz
 		;;
 	esac
 )}
@@ -183,20 +181,19 @@ docker_linux_build() {(
 		;;
 	esac
 	check radare2_${VERSION}_${debarch}.deb && return
-	prepare radare2-${VERSION} tmp
+	prepare radare2-${VERSION} tmp/debian-${debarch}
 	case "$arg" in
 	static)
-		${CWD}/dockcross --image dockcross/linux-${arch} sys/build.sh --without-pic --with-nonpic
-		${CWD}/dockcross --image dockcross/linux-${arch} sys/debian.sh
+		${CWD}/dockcross --image dockcross/linux-${arch} \
+			bash -c "sys/build.sh --without-pic --with-nonpic ; sys/debian.sh"
 		output sys/debian/radare2/*.deb
 		;;
 	shell|bash|sh)
 		${CWD}/dockcross --image dockcross/linux-${arch} bash
 		;;
 	*)
-		${CWD}/dockcross --image dockcross/linux-${arch} ./configure --with-compiler=${arch} --host=${arch}
-		${CWD}/dockcross --image dockcross/linux-${arch} sys/build.sh
-		${CWD}/dockcross --image dockcross/linux-${arch} sys/debian.sh
+		${CWD}/dockcross --image dockcross/linux-${arch} bash -c \
+			"./configure --with-compiler=${arch} --host=${arch} && sys/build.sh && sys/debian.sh"
 		output sys/debian/radare2/*.deb
 		;;
 	esac
@@ -258,12 +255,21 @@ docker_windows_build() {(
 		;;
 	*)
 		if [ "${arch}" = "x86_64-w64-mingw32.static-gcc" ]; then
-			${CWD}/dockcross --image dockcross/windows-x64 ./configure --with-compiler=${arch} --host=${arch}
-			${CWD}/dockcross --image dockcross/windows-x64 make
+			check radare2-w64-${VERSION}.zip && return
+			prepare radare2-${VERSION} tmp/windows-x64
+			${CWD}/dockcross --image dockcross/windows-x64 bash -c "
+				./configure --with-compiler=${arch} --host=${arch} &&
+				make -j4 && make w64dist"
+			output radare2-w64-${VERSION}.zip
 		else
-			${CWD}/dockcross --image dockcross/windows-x86 ./configure --with-compiler=${arch} --host=${arch}
-			${CWD}/dockcross --image dockcross/windows-x86 make
+			check radare2-w32-${VERSION}.zip && return
+			prepare radare2-${VERSION} tmp/windows-x32
+			${CWD}/dockcross --image dockcross/windows-x64 bash -c "
+				./configure --with-compiler=${arch} --host=${arch} &&
+				make -j4 && make w32dist"
+			output radare2-w32-${VERSION}.zip
 		fi
+		;;
 	esac
 )}
 
@@ -313,12 +319,13 @@ ios_build() {(
 w32_build() {(
 	arch="$1"
 	mode="$2"
+	[ -z "$arch" ] && arch="x86"
 	if [ "$arch" = x64 ]; then
 		return w64_build $arch $mode
 	fi
 	check radare2-w32-${VERSION}.zip && return
 	prepare radare2-${VERSION} tmp/mingw32
-	msg "Building Debain GNU/Linux package..."
+	msg "Building Debian GNU/Linux package..."
 	sys/mingw32.sh >> ${LOG}
 	output radare2-w32-${VERSION}.zip
 )}
@@ -326,12 +333,13 @@ w32_build() {(
 w64_build() {(
 	arch="$1"
 	mode="$2"
+	[ -z "$arch" ] && arch="x64"
 	if [ "$arch" = x86 ]; then
 		return w32_build $arch $mode
 	fi
 	check radare2-w64-${VERSION}.zip && return
-	prepare radare2-${VERSION} tmp/mingw32
-	msg "Building Debain GNU/Linux package..."
+	prepare radare2-${VERSION} tmp/mingw64
+	msg "Building Debian GNU/Linux package..."
 	sys/mingw64.sh >> ${LOG}
 	output radare2-w64-${VERSION}.zip
 )}
@@ -341,12 +349,14 @@ depends() {
 		git clone --depth 20 https://github.com/radare/$1
 		wget -c https://github.com/radare/radare2/archive/${VERSION}.tar.gz
 	else
+		if [ -n "$1" -a -d "$1" ]; then
 		(
-		cd "$1"
-		git reset --hard @~10
-		git checkout master
-		git pull
+			cd "$1"
+			git reset --hard @~10
+			git checkout master
+			git pull
 		)
+		fi
 	fi
 }
 
