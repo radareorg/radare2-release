@@ -119,12 +119,16 @@ ios:
 	${target}_build $3 $4
 	exit 0
 	;;
+-p)
+	publish_out
+	;;
 -a)
 	release_all
 	;;
 -h|help|'')
 	echo "Usage: ./main.sh [release|init|...]"
 	echo " -a                          release all default targets"
+	echo " -p                          publish out directory"
 	echo " -l                          list build targets usable via -x"
 	echo " -ll                         list arch targets"
 	echo " -x [target] [arch] [mode]   run the build.sh target for given"

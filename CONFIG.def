@@ -11,3 +11,7 @@ OUT_SSH_PORT=22
 
 CYDIA_PORT=22
 CYDIA_PATH=/var/www/cydia/debs
+
+if [ -f "~/.radare2-release.rc" ]; then
+	. ~/.radare2-release.rc
+fi
