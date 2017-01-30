@@ -101,6 +101,10 @@ ios:
 	docker_asmjs_build
 	exit 0
 	;;
+-deb)
+	docker_linux_build x86
+	docker_linux_build x64
+	;;
 -ios)
 	download radare2
 	ios_build arm
