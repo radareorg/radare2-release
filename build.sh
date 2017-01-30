@@ -162,7 +162,7 @@ ANDROID_PREFIX="/data/data/org.radare.radare2installer/radare2"
 		${CWD}/dockcross --image dockcross/android-${arch} \
 			bash -c "ANDROID=1 BUILD=0 sys/android-${arch}.sh" || return 1
 		${CWD}/dockcross --image dockcross/android-${arch} sys/"android-${arch}.sh" >> ${LOG}
-		output radare2-${VERSION}-android-${arch}.tar.gz 
+		output radare2-${VERSION}-android-${arch}.tar.gz
 		;;
 	esac
 )}
@@ -181,20 +181,19 @@ docker_linux_build() {(
 		;;
 	esac
 	check radare2_${VERSION}_${debarch}.deb && return
-	prepare radare2-${VERSION} tmp
+	prepare radare2-${VERSION} tmp/debian-${debarch}
 	case "$arg" in
 	static)
-		${CWD}/dockcross --image dockcross/linux-${arch} sys/build.sh --without-pic --with-nonpic
-		${CWD}/dockcross --image dockcross/linux-${arch} sys/debian.sh
+		${CWD}/dockcross --image dockcross/linux-${arch} \
+			bash -c "sys/build.sh --without-pic --with-nonpic ; sys/debian.sh"
 		output sys/debian/radare2/*.deb
 		;;
 	shell|bash|sh)
 		${CWD}/dockcross --image dockcross/linux-${arch} bash
 		;;
 	*)
-		${CWD}/dockcross --image dockcross/linux-${arch} ./configure --with-compiler=${arch} --host=${arch}
-		${CWD}/dockcross --image dockcross/linux-${arch} sys/build.sh
-		${CWD}/dockcross --image dockcross/linux-${arch} sys/debian.sh
+		${CWD}/dockcross --image dockcross/linux-${arch} bash -c \
+			"./configure --with-compiler=${arch} --host=${arch} && sys/build.sh && sys/debian.sh"
 		output sys/debian/radare2/*.deb
 		;;
 	esac
@@ -316,12 +315,14 @@ depends() {
 		git clone --depth 20 https://github.com/radare/$1
 		wget -c https://github.com/radare/radare2/archive/${VERSION}.tar.gz
 	else
+		if [ -n "$1" -a -d "$1" ]; then
 		(
-		cd "$1"
-		git reset --hard @~10
-		git checkout master
-		git pull
+			cd "$1"
+			git reset --hard @~10
+			git checkout master
+			git pull
 		)
+		fi
 	fi
 }
 
