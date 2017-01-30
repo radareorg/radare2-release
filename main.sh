@@ -101,6 +101,19 @@ ios:
 	docker_asmjs_build
 	exit 0
 	;;
+-ios)
+	download radare2
+	ios_build arm
+	ios_build arm64
+	ios_appstore arm
+	ios_appstore arm64
+	exit 0
+	;;
+-osx)
+	download radare2
+	osx_build
+	exit 0
+	;;
 -x)
 	target=`echo "$2" | sed -e s,-,_,g`
 	${target}_build $3 $4
@@ -115,7 +128,7 @@ ios:
 	echo " -l                          list build targets usable via -x"
 	echo " -ll                         list arch targets"
 	echo " -x [target] [arch] [mode]   run the build.sh target for given"
-	echo " -js                         build for asmjs (EXPERIMENTAL)"
+	echo " -js, -ios, -osx             build for asmjs, iOS/OSX .. (EXPERIMENTAL)"
 	echo
 	echo "Android NDK for ARM shell"
 	echo "  ./main.sh -x docker_android arm shell"
