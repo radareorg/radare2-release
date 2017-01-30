@@ -302,7 +302,7 @@ w32_build() {(
 	fi
 	check radare2-w32-${VERSION}.zip && return
 	prepare radare2-${VERSION} tmp/mingw32
-	msg "Building Debain GNU/Linux package..."
+	msg "Building Debian GNU/Linux package..."
 	sys/mingw32.sh >> ${LOG}
 	output radare2-w32-${VERSION}.zip
 )}
@@ -316,7 +316,7 @@ w64_build() {(
 	fi
 	check radare2-w64-${VERSION}.zip && return
 	prepare radare2-${VERSION} tmp/mingw64
-	msg "Building Debain GNU/Linux package..."
+	msg "Building Debian GNU/Linux package..."
 	sys/mingw64.sh >> ${LOG}
 	output radare2-w64-${VERSION}.zip
 )}
