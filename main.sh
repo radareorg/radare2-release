@@ -134,6 +134,9 @@ ios:
 -pi)
 	publish_irc
 	;;
+-pc)
+	publish_cydia
+	;;
 -pw)
 	publish_www
 	;;
