@@ -101,10 +101,30 @@ ios:
 	docker_asmjs_build
 	exit 0
 	;;
+-deb)
+	docker_linux_build x86
+	docker_linux_build x64
+	;;
+-ios)
+	download radare2
+	ios_build arm
+	ios_build arm64
+	ios_appstore arm
+	ios_appstore arm64
+	exit 0
+	;;
+-osx)
+	download radare2
+	osx_build
+	exit 0
+	;;
 -x)
 	target=`echo "$2" | sed -e s,-,_,g`
 	${target}_build $3 $4
 	exit 0
+	;;
+-p)
+	publish_out
 	;;
 -a)
 	release_all
@@ -112,10 +132,11 @@ ios:
 -h|help|'')
 	echo "Usage: ./main.sh [release|init|...]"
 	echo " -a                          release all default targets"
+	echo " -p                          publish out directory"
 	echo " -l                          list build targets usable via -x"
 	echo " -ll                         list arch targets"
 	echo " -x [target] [arch] [mode]   run the build.sh target for given"
-	echo " -js                         build for asmjs (EXPERIMENTAL)"
+	echo " -js, -ios, -osx             build for asmjs, iOS/OSX .. (EXPERIMENTAL)"
 	echo
 	echo "Android NDK for ARM shell"
 	echo "  ./main.sh -x docker_android arm shell"
