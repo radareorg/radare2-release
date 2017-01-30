@@ -131,6 +131,12 @@ ios:
 	${target}_build $3 $4
 	exit 0
 	;;
+-pi)
+	publish_irc
+	;;
+-pw)
+	publish_www
+	;;
 -p)
 	publish_out
 	;;
@@ -141,6 +147,8 @@ ios:
 	echo "Usage: ./main.sh [release|init|...]"
 	echo " -a                          release all default targets"
 	echo " -p                          publish out directory"
+	echo " -pw                         publish into radare.org"
+	echo " -pi                         update IRC title"
 	echo " -l                          list build targets usable via -x"
 	echo " -ll                         list arch targets"
 	echo " -x [target] [arch] [mode]   run the build.sh target for given"
