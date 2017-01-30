@@ -69,12 +69,12 @@ android_build() {(
 	mkdir -p tmp
 	case "$mode" in
 	shell|bash|sh)
-		prepare radare2-${VERSION} tmp/android-${arch}
+		prepare radare2-${VERSION} tmp/android-${arch} noclean
 		sys/android-shell.sh ${arch}
 		;;
 	*)
 		check radare2-${VERSION}-android-${arch}.tar.gz && return
-		prepare radare2-${VERSION} tmp/android-${arch}
+		prepare radare2-${VERSION} tmp/android-${arch} noclean
 		msg "Building android-${arch}..."
 		:> libr/libr.a
 		sys/"android-${arch}.sh" >> ${LOG}
@@ -149,9 +149,7 @@ ANDROID_PREFIX="/data/data/org.radare.radare2installer/radare2"
 		;;
 	*|static)
 		check radare2-${VERSION}-android-${arch}.tar.gz && return
-		prepare radare2-${VERSION} tmp/android-${arch}
-		# ${CWD}/dockcross --image dockcross/android-${arch} su -c 'apt install -y pax'
-		#--with-compiler=android
+		prepare radare2-${VERSION} tmp/android-${arch} noclean
 		${CWD}/dockcross --image dockcross/android-${arch} \
 			./configure \
 				--host="linux-android-${arch}" \
@@ -163,7 +161,7 @@ ANDROID_PREFIX="/data/data/org.radare.radare2installer/radare2"
 			make -s -j 4 ANDROID=1 || return 1
 		${CWD}/dockcross --image dockcross/android-${arch} \
 			bash -c "ANDROID=1 BUILD=0 sys/android-${arch}.sh" || return 1
-		#${CWD}/dockcross --image dockcross/android-${arch} sys/"android-${arch}.sh" >> ${LOG}
+		${CWD}/dockcross --image dockcross/android-${arch} sys/"android-${arch}.sh" >> ${LOG}
 		output radare2-${VERSION}-android-${arch}.tar.gz 
 		;;
 	esac
