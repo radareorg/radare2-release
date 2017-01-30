@@ -232,9 +232,13 @@ docker_windows_build() {(
 		;;
 	*)
 		if [ "${arch}" = "x86_64-w64-mingw32.static-gcc" ]; then
+			check radare2-w64-${VERSION}.tar.gz && return
+			prepare radare2-w64-${VERSION} tmp/windows-x64
 			${CWD}/dockcross --image dockcross/windows-x64 ./configure --with-compiler=${arch} --host=${arch}
 			${CWD}/dockcross --image dockcross/windows-x64 make
 		else
+			check radare2-w32-${VERSION}.tar.gz && return
+			prepare radare2-w32-${VERSION} tmp/windows-x32
 			${CWD}/dockcross --image dockcross/windows-x86 ./configure --with-compiler=${arch} --host=${arch}
 			${CWD}/dockcross --image dockcross/windows-x86 make
 		fi
