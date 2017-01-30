@@ -98,6 +98,11 @@ ios:
 	docker_asmjs_build
 	exit 0
 	;;
+-wasm)
+	download radare2
+	docker_wasm_build
+	exit 0
+	;;
 -x)
 	target=`echo "$2" | sed -e s,-,_,g`
 	${target}_build $3 $4
@@ -113,6 +118,7 @@ ios:
 	echo " -ll                         list arch targets"
 	echo " -x [target] [arch] [mode]   run the build.sh target for given"
 	echo " -js                         build for asmjs (EXPERIMENTAL)"
+	echo " -wasm                       build for web assembly (EXPERIMENTAL)"
 	echo
 	echo "Android NDK for ARM shell"
 	echo "  ./main.sh -x docker_android arm shell"
