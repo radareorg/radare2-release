@@ -313,7 +313,7 @@ w64_build() {(
 		return w32_build $arch $mode
 	fi
 	check radare2-w64-${VERSION}.zip && return
-	prepare radare2-${VERSION} tmp/mingw32
+	prepare radare2-${VERSION} tmp/mingw64
 	msg "Building Debain GNU/Linux package..."
 	sys/mingw64.sh >> ${LOG}
 	output radare2-w64-${VERSION}.zip
