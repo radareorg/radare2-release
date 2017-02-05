@@ -116,8 +116,8 @@ ios:
 -w32)
 	download radare2
 	w32_build x86
-	w64_build x64
-	#docker_windows_build x86_64-w64-mingw32.static-gcc
+	#w64_build x64
+	docker_windows_build x86_64-w64-mingw32.static-gcc
 	#docker_windows_build i686-w64-mingw32.static-gcc
 	exit 0
 	;;
