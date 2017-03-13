@@ -106,6 +106,9 @@ ios:
 	docker_asmjs_build
 	exit 0
 	;;
+-wasm)
+	download radare2
+	docker_wasm_build
 -deb)
 	docker_linux_build x86
 	docker_linux_build x64
@@ -185,6 +188,7 @@ ios:
 	echo " -x [target] [arch] [mode]   run the build.sh target for given"
 	echo " -js, -ios, -osx, -and, -lin build for asmjs, iOS/OSX/Linux/Andrdo .. (EXPERIMENTAL)"
 	echo " -armv5                      build armv5 linux debian packages"
+  echo " -wasm                       build for web assembly (EXPERIMENTAL)"
 	echo
 	echo "Android NDK for ARM shell"
 	echo "  ./main.sh -x docker_android arm shell"

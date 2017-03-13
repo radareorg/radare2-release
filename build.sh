@@ -240,6 +240,29 @@ docker_asmjs_build() {(
 	esac
 )}
 
+docker_wasm_build() {(
+	arch="$1"
+	mode="$2"
+	[ -z "$arch" ] && arch="wasm"
+	X=radare2-${VERSION}-${arch}
+	case "$mode" in
+	shell|bash|sh)
+		prepare radare2-${VERSION} tmp/radare2-wasm noclean
+		${CWD}/dockcross --image dockcross/browser-asmjs bash
+		;;
+	*)
+		check "$X".tar.gz && return
+		prepare radare2-${VERSION} tmp/radare2-wasm noclean
+		${CWD}/dockcross --image dockcross/browser-asmjs sys/wasm.sh
+		rm -rf "$X"
+		mkdir -p "$X"
+		cp -f binr/*/*.wasm "$X"
+		tar czf "$X".tar.gz "$X"
+		output "$X".tar.gz
+		;;
+	esac
+)}
+
 docker_windows_build() {(
 	arch="$1"
 	mode="$2"
