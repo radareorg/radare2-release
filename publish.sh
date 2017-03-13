@@ -1,4 +1,8 @@
 publish_checksums() {(
+	download radare2
+	download radare2-r2pipe
+	download radare2-bindings
+	download radare2-extras
 	msg "Computing checksums..."
 	cd out/${VERSION}
 	rm -f checksums.sha1sum

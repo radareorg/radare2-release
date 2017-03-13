@@ -7,6 +7,8 @@ fi
 . ./build.sh
 . ./publish.sh
 
+[ -z "$EDITOR" ] && EDITOR=vim
+
 release_all() {
 	download radare2
 	download_others
@@ -67,6 +69,9 @@ case "$1" in
 	# cut -d '(' -f 1
 	exit 0
 	;;
+-armv5)
+        docker_linux_build armv5
+	;;
 -ll)
 	echo "
 android:
@@ -119,8 +124,8 @@ ios:
 -w32)
 	download radare2
 	w32_build x86
-	w64_build x64
-	#docker_windows_build x86_64-w64-mingw32.static-gcc
+	#w64_build x64
+	docker_windows_build x86_64-w64-mingw32.static-gcc
 	#docker_windows_build i686-w64-mingw32.static-gcc
 	exit 0
 	;;
@@ -129,10 +134,31 @@ ios:
 	osx_build
 	exit 0
 	;;
+-lin)
+	download radare2
+	docker_linux_build x86
+	docker_linux_build x64
+	exit 0
+	;;
+-lin32)
+	download radare2
+	docker_linux_build x86
+	exit 0
+	;;
+-lin64)
+	download radare2
+	docker_linux_build x64
+	exit 0
+	;;
 -x)
 	target=`echo "$2" | sed -e s,-,_,g`
 	${target}_build $3 $4
 	exit 0
+	;;
+-n|-notes|--notes)
+	cd release-notes
+	$EDITOR config.json
+	make
 	;;
 -pi)
 	publish_irc
@@ -141,9 +167,10 @@ ios:
 	publish_cydia
 	;;
 -pw)
+	publish_checksums
 	publish_www
 	;;
--p)
+-p|-pub)
 	publish_out
 	;;
 -a)
@@ -153,13 +180,15 @@ ios:
 	echo "Usage: ./main.sh [release|init|...]"
 	echo " -a                          release all default targets"
 	echo " -p                          publish out directory"
+	echo " -n, -notes                  generate release notes"
 	echo " -pw                         publish into radare.org"
 	echo " -pi                         update IRC title"
 	echo " -l                          list build targets usable via -x"
 	echo " -ll                         list arch targets"
 	echo " -x [target] [arch] [mode]   run the build.sh target for given"
-	echo " -js, -ios, -osx             build for asmjs, iOS/OSX .. (EXPERIMENTAL)"
-	echo " -wasm                       build for web assembly (EXPERIMENTAL)"
+	echo " -js, -ios, -osx, -and, -lin build for asmjs, iOS/OSX/Linux/Andrdo .. (EXPERIMENTAL)"
+	echo " -armv5                      build armv5 linux debian packages"
+  echo " -wasm                       build for web assembly (EXPERIMENTAL)"
 	echo
 	echo "Android NDK for ARM shell"
 	echo "  ./main.sh -x docker_android arm shell"

@@ -25,6 +25,7 @@ const authorAlias = {
   'P4N74': 'p4n74',
   'damien': 'damo22',
   'alvaro.felipe91': 'alvarofe',
+  'bx0lm+7siazd414punk': 'schumblublub',
   'lol': 'gk',
   'github.jdrake': 'jduck',
   'andrey.torsunov': 'torsunov',
@@ -123,7 +124,7 @@ function getChangelog(upto, path, cb) {
       commits: [],
       fixes: []
     };
-  console.log('git log ' + upto + '..@ ' + path);
+  // console.log('git log ' + upto + '..@ ' + path);
     const lines = log.split('\n');
     let date = null;
     let commit = null;

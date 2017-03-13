@@ -50,16 +50,20 @@ download() {(
 	wget -O orig-${repo}-${vers}.tar.gz -qc "https://github.com/radare/${repo}/archive/${vers}.tar.gz" || exit 1
 	msg "Caching capstone clone in a new dist tarball"
 	tar xzf orig-${repo}-${vers}.tar.gz
-	(
-		cd "${repo}-${vers}"
-		./configure > /dev/null
+	if [ "$repo" = radare2 ]; then
 		(
-			cd shlr
-			make capstone
-			rm -rf capstone/.git
+			cd "${repo}-${vers}"
+			./configure > /dev/null
+			(
+				cd shlr
+				make capstone
+				rm -rf capstone/.git
+			)
 		)
-	)
-	tar czf ${repo}-${vers}.tar.gz ${repo}-${vers}
+		tar czf ${repo}-${vers}.tar.gz ${repo}-${vers}
+	else
+		cp -f orig-${repo}-${vers}.tar.gz ${repo}-${vers}.tar.gz
+	fi
 	output ${repo}-${vers}.tar.gz
 )}
 
@@ -167,6 +171,15 @@ ANDROID_PREFIX="/data/data/org.radare.radare2installer/radare2"
 	esac
 )}
 
+patch_source() {
+	if [ -d ../../../patches ]; then
+		echo "[*] Applying patches to source directory"
+		for a in ../../../patches/* ; do
+			patch -p1 < $a
+		done
+	fi
+}
+
 docker_linux_build() {(
 	arch="$1"
 	arg="$2"
@@ -179,13 +192,18 @@ docker_linux_build() {(
 	x64)
 		debarch="amd64"
 		;;
+	armv5)
+		debarch="armv5"
+		cmparch="armel"
+		;;
 	esac
 	check radare2_${VERSION}_${debarch}.deb && return
 	prepare radare2-${VERSION} tmp/debian-${debarch}
+	patch_source tmp/debian-${debarch}
 	case "$arg" in
 	static)
 		${CWD}/dockcross --image dockcross/linux-${arch} \
-			bash -c "sys/build.sh --without-pic --with-nonpic ; sys/debian.sh"
+			bash -c "sys/build.sh --without-pic --with-nonpic ; ARCH=${debarch} sys/debian.sh"
 		output sys/debian/radare2/*.deb
 		;;
 	shell|bash|sh)
@@ -193,7 +211,7 @@ docker_linux_build() {(
 		;;
 	*)
 		${CWD}/dockcross --image dockcross/linux-${arch} bash -c \
-			"./configure --with-compiler=${arch} --host=${arch} && sys/build.sh && sys/debian.sh"
+			"./configure --with-compiler=${arch} --host=${arch}-linux-gnu && sys/build.sh && ARCH=${debarch} sys/debian.sh"
 		output sys/debian/radare2/*.deb
 		;;
 	esac
@@ -325,7 +343,7 @@ w32_build() {(
 	fi
 	check radare2-w32-${VERSION}.zip && return
 	prepare radare2-${VERSION} tmp/mingw32
-	msg "Building Debian GNU/Linux package..."
+	msg "Building mingw32 zip..."
 	sys/mingw32.sh >> ${LOG}
 	output radare2-w32-${VERSION}.zip
 )}
@@ -339,8 +357,8 @@ w64_build() {(
 	fi
 	check radare2-w64-${VERSION}.zip && return
 	prepare radare2-${VERSION} tmp/mingw64
-	msg "Building Debian GNU/Linux package..."
-	sys/mingw64.sh >> ${LOG}
+	msg "Building mingw64 zip..."
+	sys/mingw64.sh >> ${LOG} || echo 'missing mingw64 compiler'
 	output radare2-w64-${VERSION}.zip
 )}
 
