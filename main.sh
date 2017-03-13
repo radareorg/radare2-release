@@ -109,6 +109,7 @@ ios:
 -wasm)
 	download radare2
 	docker_wasm_build
+	;;
 -deb)
 	docker_linux_build x86
 	docker_linux_build x64
