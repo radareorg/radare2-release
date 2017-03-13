@@ -173,6 +173,9 @@ ios:
 -p|-pub)
 	publish_out
 	;;
+-pa|-pub-and|-andpub|--pub-and|--and-pub)
+	publish_android
+	;;
 -a)
 	release_all
 	;;
@@ -180,6 +183,7 @@ ios:
 	echo "Usage: ./main.sh [release|init|...]"
 	echo " -a                          release all default targets"
 	echo " -p                          publish out directory"
+	echo " -pa,--pub-and               publish android builds in the radare2-bin repo"
 	echo " -n, -notes                  generate release notes"
 	echo " -pw                         publish into radare.org"
 	echo " -pi                         update IRC title"
@@ -188,7 +192,7 @@ ios:
 	echo " -x [target] [arch] [mode]   run the build.sh target for given"
 	echo " -js, -ios, -osx, -and, -lin build for asmjs, iOS/OSX/Linux/Andrdo .. (EXPERIMENTAL)"
 	echo " -armv5                      build armv5 linux debian packages"
-  echo " -wasm                       build for web assembly (EXPERIMENTAL)"
+	echo " -wasm                       build for web assembly (EXPERIMENTAL)"
 	echo
 	echo "Android NDK for ARM shell"
 	echo "  ./main.sh -x docker_android arm shell"
