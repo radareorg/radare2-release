@@ -64,15 +64,10 @@ release_all() {
 }
 
 case "$1" in
--l)
-	cat build.sh | grep '()' | grep build | awk -F '_build' '{print $1}'
-	# cut -d '(' -f 1
-	exit 0
-	;;
 -armv5)
         docker_linux_build armv5
 	;;
--ll)
+-l)
 	echo "
 android:
 	x86
@@ -152,8 +147,12 @@ ios:
 	exit 0
 	;;
 -x)
-	target=`echo "$2" | sed -e s,-,_,g`
-	${target}_build $3 $4
+	if [ -z "$2" ]; then
+		cat build.sh | grep '()' | grep build | awk -F '_build' '{print $1}'
+	else
+		target=`echo "$2" | sed -e s,-,_,g`
+		${target}_build $3 $4
+	fi
 	exit 0
 	;;
 -n|-notes|--notes)
