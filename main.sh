@@ -145,6 +145,7 @@ ios:
 	publish_cydia
 	;;
 -pw)
+	publish_checksums
 	publish_www
 	;;
 -p|-pub)
