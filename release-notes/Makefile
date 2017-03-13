@@ -1,5 +1,6 @@
 all: node_modules radare2
 	cd radare2 ; git pull
+	cd radare2 ; git pull --tags
 	cd radare2 ; node ..
 
 radare2:
