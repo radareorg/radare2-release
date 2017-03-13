@@ -7,6 +7,8 @@ fi
 . ./build.sh
 . ./publish.sh
 
+[ -z "$EDITOR" ] && EDITOR=vim
+
 release_all() {
 	download radare2
 	download_others
@@ -131,6 +133,11 @@ ios:
 	${target}_build $3 $4
 	exit 0
 	;;
+-n|-notes|--notes)
+	cd release-notes
+	$EDITOR config.json
+	make
+	;;
 -pi)
 	publish_irc
 	;;
@@ -150,6 +157,7 @@ ios:
 	echo "Usage: ./main.sh [release|init|...]"
 	echo " -a                          release all default targets"
 	echo " -p                          publish out directory"
+	echo " -n, -notes                  generate release notes"
 	echo " -pw                         publish into radare.org"
 	echo " -pi                         update IRC title"
 	echo " -l                          list build targets usable via -x"
