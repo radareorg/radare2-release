@@ -128,6 +128,22 @@ ios:
 	osx_build
 	exit 0
 	;;
+-lin)
+	download radare2
+	docker_linux_build x86
+	docker_linux_build x64
+	exit 0
+	;;
+-lin32)
+	download radare2
+	docker_linux_build x86
+	exit 0
+	;;
+-lin64)
+	download radare2
+	docker_linux_build x64
+	exit 0
+	;;
 -x)
 	target=`echo "$2" | sed -e s,-,_,g`
 	${target}_build $3 $4
@@ -164,7 +180,7 @@ ios:
 	echo " -l                          list build targets usable via -x"
 	echo " -ll                         list arch targets"
 	echo " -x [target] [arch] [mode]   run the build.sh target for given"
-	echo " -js, -ios, -osx             build for asmjs, iOS/OSX .. (EXPERIMENTAL)"
+	echo " -js, -ios, -osx, -and, -lin build for asmjs, iOS/OSX/Linux/Andrdo .. (EXPERIMENTAL)"
 	echo
 	echo "Android NDK for ARM shell"
 	echo "  ./main.sh -x docker_android arm shell"
