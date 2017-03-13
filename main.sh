@@ -147,7 +147,7 @@ ios:
 -pw)
 	publish_www
 	;;
--p)
+-p|-pub)
 	publish_out
 	;;
 -a)
