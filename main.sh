@@ -69,6 +69,9 @@ case "$1" in
 	# cut -d '(' -f 1
 	exit 0
 	;;
+-armv5)
+        docker_linux_build armv5
+	;;
 -ll)
 	echo "
 android:
@@ -181,6 +184,7 @@ ios:
 	echo " -ll                         list arch targets"
 	echo " -x [target] [arch] [mode]   run the build.sh target for given"
 	echo " -js, -ios, -osx, -and, -lin build for asmjs, iOS/OSX/Linux/Andrdo .. (EXPERIMENTAL)"
+	echo " -armv5                      build armv5 linux debian packages"
 	echo
 	echo "Android NDK for ARM shell"
 	echo "  ./main.sh -x docker_android arm shell"

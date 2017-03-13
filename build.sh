@@ -171,6 +171,15 @@ ANDROID_PREFIX="/data/data/org.radare.radare2installer/radare2"
 	esac
 )}
 
+patch_source() {
+	if [ -d ../../../patches ]; then
+		echo "[*] Applying patches to source directory"
+		for a in ../../../patches/* ; do
+			patch -p1 < $a
+		done
+	fi
+}
+
 docker_linux_build() {(
 	arch="$1"
 	arg="$2"
@@ -183,13 +192,18 @@ docker_linux_build() {(
 	x64)
 		debarch="amd64"
 		;;
+	armv5)
+		debarch="armv5"
+		cmparch="armel"
+		;;
 	esac
 	check radare2_${VERSION}_${debarch}.deb && return
 	prepare radare2-${VERSION} tmp/debian-${debarch}
+	patch_source tmp/debian-${debarch}
 	case "$arg" in
 	static)
 		${CWD}/dockcross --image dockcross/linux-${arch} \
-			bash -c "sys/build.sh --without-pic --with-nonpic ; sys/debian.sh"
+			bash -c "sys/build.sh --without-pic --with-nonpic ; ARCH=${debarch} sys/debian.sh"
 		output sys/debian/radare2/*.deb
 		;;
 	shell|bash|sh)
@@ -197,7 +211,7 @@ docker_linux_build() {(
 		;;
 	*)
 		${CWD}/dockcross --image dockcross/linux-${arch} bash -c \
-			"./configure --with-compiler=${arch} --host=${arch} && sys/build.sh && sys/debian.sh"
+			"./configure --with-compiler=${arch} --host=${arch}-linux-gnu && sys/build.sh && ARCH=${debarch} sys/debian.sh"
 		output sys/debian/radare2/*.deb
 		;;
 	esac
