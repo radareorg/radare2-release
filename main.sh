@@ -121,6 +121,11 @@ ios:
 	ios_appstore arm64
 	exit 0
 	;;
+-ios-sdk)
+	ios_appstore arm
+	ios_appstore arm64
+	exit 0
+	;;
 -w32)
 	download radare2
 	w32_build x86

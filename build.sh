@@ -307,7 +307,7 @@ docker_windows_build() {(
 
 ios_appstore() {(
 	arch="$1"
-	[ -z "$1" ] || arch="arm64"
+	[ -z "$1" ] && arch="arm64"
 	check radare2-ios-${arch}-${VERSION}.tar.gz && return
 	prepare radare2-${VERSION} tmp/ios-appstore
 	msg "Building for the iOS appstore..."
