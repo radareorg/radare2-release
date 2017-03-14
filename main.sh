@@ -22,8 +22,9 @@ release_all() {
 
 	docker_linux_build x86
 	docker_linux_build x64
-
+	docker_linux_build mipsel
 	docker_linux_build armv5
+
 	# rpi? must test
 	#docker_linux_build armv6
 	#docker_linux_build armv7
@@ -66,6 +67,9 @@ release_all() {
 case "$1" in
 -armv5)
         docker_linux_build armv5
+	;;
+-mipsel)
+        docker_linux_build mipsel $2
 	;;
 -l)
 	echo "
@@ -138,12 +142,12 @@ ios:
 	;;
 -lin32)
 	download radare2
-	docker_linux_build x86
+	docker_linux_build x86 $2
 	exit 0
 	;;
 -lin64)
 	download radare2
-	docker_linux_build x64
+	docker_linux_build x64 $2
 	exit 0
 	;;
 -x)
@@ -158,7 +162,8 @@ ios:
 -n|-notes|--notes)
 	cd release-notes
 	$EDITOR config.json
-	make
+	make | tee notes.txt
+	echo "See notes.txt"
 	;;
 -pi)
 	publish_irc
@@ -191,7 +196,7 @@ ios:
 	echo " -ll                         list arch targets"
 	echo " -x [target] [arch] [mode]   run the build.sh target for given"
 	echo " -js, -ios, -osx, -and, -lin build for asmjs, iOS/OSX/Linux/Andrdo .. (EXPERIMENTAL)"
-	echo " -armv5                      build armv5 linux debian packages"
+	echo " -armv5 -mipsel              build armv5 linux debian packages"
 	echo " -wasm                       build for web assembly (EXPERIMENTAL)"
 	echo
 	echo "Android NDK for ARM shell"

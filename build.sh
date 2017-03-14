@@ -72,7 +72,7 @@ android_build() {(
 	mode="$2"
 	mkdir -p tmp
 	case "$mode" in
-	shell|bash|sh)
+	-s|--shell|shell|bash|sh)
 		prepare radare2-${VERSION} tmp/android-${arch} noclean
 		sys/android-shell.sh ${arch}
 		;;
@@ -102,7 +102,7 @@ osx_build() {(
 	fi
 	mode="$2"
 	case "$mode" in
-	shell|sh|bash)
+	-s|--shell|shell|sh|bash)
 		prepare radare2-${VERSION} tmp/osx-pkg
 		bash
 		;;
@@ -121,7 +121,7 @@ linux_build() {(
 	arch="`uname -m`"
 	mode="$2"
 	case "$mode" in
-	shell|bash|sh)
+	-s|--shell|shell|bash|sh)
 		prepare radare2-${VERSION} tmp/linux-${arch}
 		bash
 		;;
@@ -138,9 +138,9 @@ linux_build() {(
 docker_android_build() {(
 	arch="$1"
 	mode="$2"
-ANDROID_PREFIX="/data/data/org.radare.radare2installer/radare2"
+	ANDROID_PREFIX="/data/data/org.radare.radare2installer/radare2"
 	case "$mode" in
-	shell|bash|sh)
+	-s|--shell|shell|bash|sh)
 		prepare radare2-${VERSION} tmp/android-${arch}
 		${CWD}/dockcross --image dockcross/android-${arch} \
 			./configure \
@@ -185,16 +185,25 @@ docker_linux_build() {(
 	arg="$2"
 	[ -z "$arch" ] && arch="x86"
 	debarch="$arch"
+	cmparch="$arch"
 	case "$arch" in
 	x86)
 		debarch="i686"
+		cmparch="i686"
 		;;
 	x64)
 		debarch="amd64"
+		cmparch="x86_64"
 		;;
 	armv5)
+		CFGARGS="--with-compiler=${arch}"
 		debarch="armv5"
 		cmparch="armel"
+		;;
+	mipsel)
+		CFGARGS="--with-compiler=${arch}"
+		debarch="mipsel"
+		cmparch="mipsel"
 		;;
 	esac
 	check radare2_${VERSION}_${debarch}.deb && return
@@ -206,12 +215,17 @@ docker_linux_build() {(
 			bash -c "sys/build.sh --without-pic --with-nonpic ; ARCH=${debarch} sys/debian.sh"
 		output sys/debian/radare2/*.deb
 		;;
-	shell|bash|sh)
+	-s|--shell|shell|bash|sh)
 		${CWD}/dockcross --image dockcross/linux-${arch} bash
 		;;
 	*)
 		${CWD}/dockcross --image dockcross/linux-${arch} bash -c \
-			"./configure --with-compiler=${arch} --host=${arch}-linux-gnu && sys/build.sh && ARCH=${debarch} sys/debian.sh"
+			"export AR=${cmparch}-linux-gnu-ar ;
+			export CC=${cmparch}-linux-gnu-gcc ;
+			export CFLAGS=-O2 ;
+			export ARCH=${debarch} ;
+			export MAKE='make V=1' ;
+			./configure ${CFGARGS} --prefix=/usr --host=${cmparch}-linux-gnu && make -j4 V=1 && sys/debian.sh"
 		output sys/debian/radare2/*.deb
 		;;
 	esac
@@ -223,7 +237,7 @@ docker_asmjs_build() {(
 	[ -z "$arch" ] && arch="asmjs"
 	X=radare2-${VERSION}-${arch}
 	case "$mode" in
-	shell|bash|sh)
+	-s|--shell|shell|bash|sh)
 		prepare radare2-${VERSION} tmp/radare2-asmjs noclean
 		${CWD}/dockcross --image dockcross/browser-asmjs bash
 		;;
@@ -246,7 +260,7 @@ docker_wasm_build() {(
 	[ -z "$arch" ] && arch="wasm"
 	X=radare2-${VERSION}-${arch}
 	case "$mode" in
-	shell|bash|sh)
+	-s|--shell|shell|bash|sh)
 		prepare radare2-${VERSION} tmp/radare2-wasm noclean
 		${CWD}/dockcross --image dockcross/browser-asmjs bash
 		;;
@@ -268,7 +282,7 @@ docker_windows_build() {(
 	mode="$2"
 	cd tmp/radare*
 	case "$mode" in
-	shell|sh|bash)
+	-s|--shell|shell|sh|bash)
 		${CWD}/dockcross --image dockcross/windows-x64 bash
 		;;
 	*)
@@ -307,7 +321,7 @@ ios_build() {(
 	arch="$1"
 	mode="$2"
 	case "$mode" in
-	shell|sh|bash)
+	-s|--shell|shell|sh|bash)
 		prepare radare2-${VERSION} tmp/ios-cydia-${arch}
 		sys/ios-sdk.sh -s
 		exit 0
