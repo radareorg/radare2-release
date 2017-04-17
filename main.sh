@@ -178,7 +178,7 @@ ios:
 	;;
 -pw)
 	publish_checksums
-	publish_www
+	#publish_www
 	;;
 -p|-pub)
 	publish_out
