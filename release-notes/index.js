@@ -39,7 +39,7 @@ const authorAlias = {
   'incredible.angst': 'kolen',
 };
 
-const columns = [ 'name', 'commits', 'fix', 'add', 'honor', 'leak', 'esil', 'endian', 'authors' ];
+const columns = [ 'name', 'commits', 'fix', 'add', 'honor', 'leak', 'authors' ];
 
 const paths = [
   '', // total
@@ -66,9 +66,9 @@ const paths = [
    'libr/search',
    'shlr/sdb',
   'shlr/tcc',
-   */
   'shlr/bochs',
   'man',
+   */
 ];
 
 function execute(command, cb) {
