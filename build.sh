@@ -81,7 +81,7 @@ android_build() {(
 		prepare radare2-${VERSION} tmp/android-${arch} noclean
 		msg "Building android-${arch}..."
 		:> libr/libr.a
-		sys/"android-${arch}.sh" >> ${LOG}
+		sys/android-build.sh ${arch} >> ${LOG}
 		output radare2-${VERSION}-android-${arch}.tar.gz
 		;;
 	esac
