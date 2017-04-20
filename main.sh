@@ -32,8 +32,10 @@ release_all() {
 	#docker_linux_build mipsel
 	docker_linux_build mipsel static
 
+	w32_build x86
+	#w64_build x64
 	docker_windows_build x86_64-w64-mingw32.static-gcc
-	docker_windows_build i686-w64-mingw32.static-gcc
+	# docker_windows_build i686-w64-mingw32.static-gcc
 
 	case "`uname`" in
 	Darwin)
@@ -129,10 +131,13 @@ ios:
 -w32)
 	download radare2
 	w32_build x86
-	#w64_build x64
-	docker_windows_build x86_64-w64-mingw32.static-gcc
 	#docker_windows_build i686-w64-mingw32.static-gcc
 	exit 0
+	;;
+-w64)
+	download radare2
+	#w64_build x64
+	docker_windows_build x86_64-w64-mingw32.static-gcc
 	;;
 -osx)
 	download radare2
