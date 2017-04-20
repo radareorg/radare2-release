@@ -1,0 +1,4 @@
+#!/bin/sh
+r=`readlink $0`
+cd `dirname $r`/..
+./main.sh $*
