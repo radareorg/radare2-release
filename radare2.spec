@@ -5,7 +5,7 @@ Summary:        Radare is a portable reversing framework
 
 License:        LGPLv3 
 URL:            https://radare.org
-Source0:        http://cloud.radare.org/get/1.1.0/radare2-%{version}.tar.gz
+Source0:        http://cloud.radare.org/get/1.4.0/radare2-%{version}.tar.gz
 
 BuildRequires:  openssl-devel
 BuildRequires:  capstone-devel
