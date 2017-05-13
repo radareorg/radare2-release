@@ -1,5 +1,5 @@
 Name:           radare2
-Version:        1.1.0
+Version:        1.4.0
 Release:        1%{?dist}
 Summary:        Radare is a portable reversing framework
 
@@ -49,6 +49,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %license COPYING COPYING.LESSER
+%doc AUTHORS.md CONTRIBUTING.md DEVELOPERS.md README.md
 %{_bindir}/*
 %{_libdir}/libr*
 %{_docdir}/radare2/*
@@ -63,18 +64,19 @@ rm -rf $RPM_BUILD_ROOT
 %{_datadir}/%{name}/%{version}/hud
 %{_mandir}/man1/*
 %{_mandir}/man7/*
-%doc DEVELOPERS* README*
 
 %files devel
 %license COPYING COPYING.LESSER
+%doc AUTHORS.md CONTRIBUTING.md DEVELOPERS.md README.md
 %{_includedir}/libr
 %{_libdir}/*.so
 %{_libdir}/radare2/last
 %{_libdir}/radare2/%{version}/*.so
 %{_libdir}/pkgconfig/*.pc
-%doc DEVELOPERS* README*
 
 %changelog
-* Fri Jan 20 2017 siddharth.kde@gmail.com - 1.1.0-1
-- Init New Package Radare 2 
+* Fri May 13 2017 Siddharth Sharma <siddharth.kde@gmail.com> - 1.4.0-1
+- Radare2 release 1.4.0
 
+* Fri Jan 20 2017 Siddharth Sharma <siddharth.kde@gmail.com> - 1.1.0-1
+- Init New Package Radare 2
