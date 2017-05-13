@@ -9,7 +9,6 @@ Source0:        http://cloud.radare.org/get/1.4.0/radare2-%{version}.tar.gz
 
 BuildRequires:  openssl-devel
 BuildRequires:  capstone-devel
-BuildRequires:  gcc-c++
 BuildRequires:  libzip-devel
 
 Requires: capstone  
