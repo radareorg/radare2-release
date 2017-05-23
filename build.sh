@@ -4,7 +4,11 @@ LOG="${CWD}/log.txt"
 
 mkdir -p tmp out
 msg() {
-	echo "\033[32m[*] $@\033[0m"
+	printf "\033[32m[*] %s\033[0m\n" "$@"
+}
+
+err() {
+	printf "\033[31m[-] %s\033[0m\n" "$@"
 }
 
 output() {(
@@ -374,6 +378,32 @@ w64_build() {(
 	msg "Building mingw64 zip..."
 	sys/mingw64.sh >> ${LOG} || echo 'missing mingw64 compiler'
 	output radare2-w64-${VERSION}.zip
+)}
+
+w64_msvc() {(
+	ZIP="radare2-w64_msvc-${VERSION}.zip"
+	check "${ZIP}" && return
+
+	# Retrieve latest msvc release information
+	latest_builds=$(curl -s "https://ci.appveyor.com/api/projects/radare/radare2-shvdd")
+	# TODO Maybe the api can force the branch
+	if ! echo "${latest_builds}" | grep -q '"branch":"master"'; then
+		err "Cannot find latest appveyor release ..."
+		return
+	fi
+	jobid=$(echo "${latest_builds}" | sed -e 's/^.*jobId":"\(.*\)",.*builder=msvc_meson.*/\1/')
+	msg "Found latest msvc jobid: ${jobid}"
+	res=$(curl -s "https://ci.appveyor.com/api/buildjobs/${jobid}/artifacts")
+	artifact_name=$(echo "${res}" | sed -e 's/^.*"fileName":"\(.*\)","type":.*/\1/')
+	if ! echo "${artifact_name}" | grep -q "radare2-msvc_meson-.*zip"; then
+	       	err "File name seems invalid: ${artifact_name} ${res}. Exiting..."
+		return
+	fi
+
+	# Download latest release
+	curl -L "https://ci.appveyor.com/api/buildjobs/${jobid}/artifacts/${artifact_name}" -o "${ZIP}"
+	output "${ZIP}"
+	rm "${ZIP}"
 )}
 
 depends() {
