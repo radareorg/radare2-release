@@ -8,3 +8,9 @@ radare2:
 
 node_modules:
 	yarn
+
+clean:
+	rm -f notes.txt
+
+mrproper:
+	rm -rf node_modules
