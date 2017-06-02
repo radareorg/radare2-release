@@ -380,7 +380,7 @@ w64_build() {(
 	output radare2-w64-${VERSION}.zip
 )}
 
-w64_msvc() {(
+w64_msvc_build() {(
 	ZIP="radare2-w64_msvc-${VERSION}.zip"
 	check "${ZIP}" && return
 

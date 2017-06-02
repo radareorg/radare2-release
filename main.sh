@@ -34,7 +34,7 @@ release_all() {
 
 	w32_build x86
 	#w64_build x64
-	w64_msvc
+	w64_msvc_build
 	docker_windows_build x86_64-w64-mingw32.static-gcc
 	# docker_windows_build i686-w64-mingw32.static-gcc
 
@@ -96,7 +96,8 @@ osx:
 
 windows:
 	x86
-	x65
+	x64
+        msvc64
 
 ios:
 	armv7
@@ -140,8 +141,8 @@ ios:
 	#w64_build x64
 	docker_windows_build x86_64-w64-mingw32.static-gcc
 	;;
--w64_msvc)
-	w64_msvc
+-w64_msvc|msvc64)
+	w64_msvc_build
 	;;
 -osx)
 	download radare2
@@ -211,6 +212,7 @@ ios:
 	echo " -x [target] [arch] [mode]   run the build.sh target for given"
 	echo " -js, -ios, -osx, -and, -lin build for asmjs, iOS/OSX/Linux/Andrdo .. (EXPERIMENTAL)"
 	echo " -armv5 -mipsel              build armv5 linux debian packages"
+	echo " -msvc64, -w64, -w32         windows-specific things"
 	echo " -wasm                       build for web assembly (EXPERIMENTAL)"
 	echo
 	echo "Android NDK for ARM shell"
@@ -221,6 +223,9 @@ ios:
 	;;
 *)
 	target=`echo "$1" | sed -e s,-,_,g`
+	if [ "$target" = _msvc64 ]; then
+		target="w64_msvc"
+	fi
 	${target}_build $2 $3
 	;;
 esac
