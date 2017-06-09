@@ -382,6 +382,7 @@ w64_build() {(
 
 w64_msvc_build() {(
 	ZIP="radare2-w64_msvc-${VERSION}.zip"
+	builder="msvc_ninja_64"
 	check "${ZIP}" && return
 
 	# Retrieve latest msvc release information
@@ -391,11 +392,11 @@ w64_msvc_build() {(
 		err "Cannot find latest appveyor release ..."
 		return
 	fi
-	jobid=$(echo "${latest_builds}" | sed -e 's/^.*jobId":"\(.*\)",.*builder=msvc_meson.*/\1/')
+	jobid=$(echo "${latest_builds}" | sed -e "s/^.*jobId\":\"\(.*\)\",.*builder=${builder}.*/\1/")
 	msg "Found latest msvc jobid: ${jobid}"
 	res=$(curl -s "https://ci.appveyor.com/api/buildjobs/${jobid}/artifacts")
-	artifact_name=$(echo "${res}" | sed -e 's/^.*"fileName":"\(.*\)","type":.*/\1/')
-	if ! echo "${artifact_name}" | grep -q "radare2-msvc_meson-.*zip"; then
+	artifact_name=$(echo "${res}" | sed -e 's/^.*"fileName":"\(.*\.zip\)","type":.*/\1/')
+	if ! echo "${artifact_name}" | grep -q "radare2-${builder}-.*zip"; then
 	       	err "File name seems invalid: ${artifact_name} ${res}. Exiting..."
 		return
 	fi
