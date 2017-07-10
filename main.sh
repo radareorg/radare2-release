@@ -34,7 +34,8 @@ release_all() {
 
 	w32_build x86
 	#w64_build x64
-	w64_msvc_build
+	msvc_32_build
+	msvc_64_build
 	docker_windows_build x86_64-w64-mingw32.static-gcc
 	# docker_windows_build i686-w64-mingw32.static-gcc
 
@@ -97,7 +98,8 @@ osx:
 windows:
 	x86
 	x64
-        msvc64
+	msvc32
+	msvc64
 
 ios:
 	armv7
@@ -141,8 +143,11 @@ ios:
 	#w64_build x64
 	docker_windows_build x86_64-w64-mingw32.static-gcc
 	;;
--w64_msvc|msvc64)
-	w64_msvc_build
+-msvc_32|msvc32)
+	msvc_32_build
+	;;
+-msvc_64|msvc64)
+	msvc_64_build
 	;;
 -osx)
 	download radare2

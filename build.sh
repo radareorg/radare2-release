@@ -380,10 +380,27 @@ w64_build() {(
 	output radare2-w64-${VERSION}.zip
 )}
 
-w64_msvc_build() {(
-	ZIP="radare2-w64_msvc-${VERSION}.zip"
-	builder="msvc_ninja_64"
+msvc_64_build() {(
+	ZIP="radare2-msvc_64-${VERSION}.zip"
+	builder="vs2015_64"
 	check "${ZIP}" && return
+	appveyor_download ${ZIP} ${builder}
+	output "${ZIP}"
+	rm "${ZIP}"
+)}
+
+msvc_32_build() {(
+	ZIP="radare2-msvc_32-${VERSION}.zip"
+	builder="vs2015_32"
+	check "${ZIP}" && return
+	appveyor_download ${ZIP} ${builder}
+	output "${ZIP}"
+	rm "${ZIP}"
+)}
+
+appveyor_download() {(
+	ZIP=$1
+	builder=$2
 
 	# Retrieve latest msvc release information
 	latest_builds=$(curl -s "https://ci.appveyor.com/api/projects/radare/radare2-shvdd")
@@ -403,8 +420,6 @@ w64_msvc_build() {(
 
 	# Download latest release
 	curl -L "https://ci.appveyor.com/api/buildjobs/${jobid}/artifacts/${artifact_name}" -o "${ZIP}"
-	output "${ZIP}"
-	rm "${ZIP}"
 )}
 
 depends() {
