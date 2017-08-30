@@ -139,6 +139,35 @@ linux_build() {(
 	esac
 )}
 
+# debian-x86_64_r2frida
+R2FRIDA_VERSION=1.8
+r2frida_build() {(
+	arch="x64"
+	mode="$2"
+	case "$mode" in
+	-s|--shell|shell|bash|sh)
+		echo "No shell here"
+		exit 0
+		;;
+	*)
+		msg "Building amd64 Debian GNU/Linux r2frida package..."
+		# XXX r2frida version hardcoded
+		check r2frida_${R2FRIDA_VERION}_amd64.deb && return
+		if [ -d tmp/r2frida ]; then
+			( cd tmp/r2frida ; git pull )
+		else
+			mkdir -p tmp
+			git clone --depth 20 https://github.com/nowsecure/r2frida tmp/r2frida
+		fi
+		(
+			cd tmp/r2frida/dist/debian
+			make >> ${LOG}
+		)
+		output tmp/r2frida/dist/debian/*.deb
+		;;
+	esac
+)}
+
 docker_android_build() {(
 	arch="$1"
 	mode="$2"
