@@ -141,7 +141,7 @@ linux_build() {(
 
 # debian-x86_64_r2frida
 R2FRIDA_VERSION=1.8
-r2frida_build() {(
+docker_linux_r2frida_build() {(
 	arch="x64"
 	mode="$2"
 	case "$mode" in

@@ -69,6 +69,9 @@ release_all() {
 }
 
 case "$1" in
+-r2frida)
+        docket_linux_r2frida_build x64
+	;;
 -armv5)
         docker_linux_build armv5
 	;;
@@ -219,6 +222,7 @@ ios:
 	echo " -armv5 -mipsel              build armv5 linux debian packages"
 	echo " -msvc64, -w64, -w32         windows-specific things"
 	echo " -wasm                       build for web assembly (EXPERIMENTAL)"
+	echo " -r2frida                    build r2frida plugin for Debian (EXPERIMENTAL)"
 	echo
 	echo "Android NDK for ARM shell"
 	echo "  ./main.sh -x docker_android arm shell"
