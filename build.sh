@@ -27,7 +27,7 @@ prepare() {
 	msg "Preparing ${namver} in ${wrkdir}..."
 	case "$action" in
 	noclean)
-		if [ ! -d "${wrkdir}" ]; then
+		if [ ! -d "${wrkdir}/${namver}" ]; then
 			mkdir -p "${wrkdir}"
 			tar xzf "tmp/${namver}.tar.gz" -C "${wrkdir}" || exit 1
 		fi
@@ -38,6 +38,7 @@ prepare() {
 		tar xzf "tmp/${namver}.tar.gz" -C "${wrkdir}" || exit 1
 		;;
 	esac
+	echo "${wrkdir}/${namver}"
 	cd "${wrkdir}/${namver}" || exit 1
 }
 
@@ -204,15 +205,6 @@ docker_android_build() {(
 	esac
 )}
 
-patch_source() {
-	if [ -d ../../../patches ]; then
-		echo "[*] Applying patches to source directory"
-		for a in ../../../patches/* ; do
-			patch -p1 < $a
-		done
-	fi
-}
-
 docker_linux_build() {(
 	arch="$1"
 	arg="$2"
@@ -241,7 +233,6 @@ docker_linux_build() {(
 	esac
 	check radare2_${VERSION}_${debarch}.deb && return
 	prepare radare2-${VERSION} tmp/debian-${debarch}
-	patch_source tmp/debian-${debarch}
 	case "$arg" in
 	static)
 		${CWD}/dockcross --image dockcross/linux-${arch} \
