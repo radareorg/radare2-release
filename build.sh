@@ -418,9 +418,28 @@ msvc_32_build() {(
 	rm "${ZIP}"
 )}
 
+msvc_64_installer() {(
+	EXE="radare2_installer-msvc_64-${VERSION}.exe"
+	builder="vs2015_64"
+	check "${EXE}" && return
+	appveyor_download ${EXE} ${builder} 1
+	output "${EXE}"
+	rm "${EXE}"
+)}
+
+msvc_32_installer() {(
+	EXE="radare2_installer-msvc_32-${VERSION}.exe"
+	builder="vs2015_32"
+	check "${EXE}" && return
+	appveyor_download ${EXE} ${builder} 1
+	output "${EXE}"
+	rm "${EXE}"
+)}
+
 appveyor_download() {(
-	ZIP=$1
+	OUTFILE=$1
 	builder=$2
+	installer=$3
 
 	# Retrieve latest msvc release information
 	latest_builds=$(curl -s "https://ci.appveyor.com/api/projects/radare/radare2-shvdd")
@@ -432,14 +451,22 @@ appveyor_download() {(
 	jobid=$(echo "${latest_builds}" | sed -e "s/^.*jobId\":\"\(.*\)\",.*builder=${builder}.*/\1/")
 	msg "Found latest msvc jobid: ${jobid}"
 	res=$(curl -s "https://ci.appveyor.com/api/buildjobs/${jobid}/artifacts")
-	artifact_name=$(echo "${res}" | sed -e 's/^.*"fileName":"\(.*\.zip\)","type":.*/\1/')
-	if ! echo "${artifact_name}" | grep -q "radare2-${builder}-.*zip"; then
-	       	err "File name seems invalid: ${artifact_name} ${res}. Exiting..."
-		return
+	if [ -z "${installer}" ]; then
+		artifact_name=$(echo "${res}" | sed -e 's/^.*"fileName":"\(.*\.zip\)","type":.*/\1/')
+		if ! echo "${artifact_name}" | grep -q "radare2-${builder}-.*zip"; then
+		       	err "File name seems invalid: '${artifact_name}' ${res}. Exiting..."
+			return
+		fi
+	else
+		artifact_name=$(echo "${res}" | sed -e 's/^.*"fileName":"\(.*\.exe\)","type":.*/\1/')
+		if ! echo "${artifact_name}" | grep -q "radare2_installer-${builder}.exe"; then
+		       	err "File name seems invalid: '${artifact_name}' ${res}. Exiting..."
+			return
+		fi
 	fi
 
 	# Download latest release
-	curl -L "https://ci.appveyor.com/api/buildjobs/${jobid}/artifacts/${artifact_name}" -o "${ZIP}"
+	curl -L "https://ci.appveyor.com/api/buildjobs/${jobid}/artifacts/${artifact_name}" -o "${OUTFILE}"
 )}
 
 depends() {
