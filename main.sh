@@ -36,6 +36,8 @@ release_all() {
 	#w64_build x64
 	msvc_32_build
 	msvc_64_build
+	msvc_32_installer
+	msvc_64_installer
 	docker_windows_build x86_64-w64-mingw32.static-gcc
 	# docker_windows_build i686-w64-mingw32.static-gcc
 
@@ -103,6 +105,8 @@ windows:
 	x64
 	msvc32
 	msvc64
+	msvc32_installer
+	msvc64_installer
 
 ios:
 	armv7
@@ -145,6 +149,12 @@ ios:
 	download radare2
 	#w64_build x64
 	docker_windows_build x86_64-w64-mingw32.static-gcc
+	;;
+-msvc_32_installer|msvc32_installer)
+	msvc_32_installer
+	;;
+-msvc_64_installer|msvc64_installer)
+	msvc_64_installer
 	;;
 -msvc_32|msvc32)
 	msvc_32_build
