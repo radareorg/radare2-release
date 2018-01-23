@@ -400,7 +400,7 @@ w64_build() {(
 	output radare2-w64-${VERSION}.zip
 )}
 
-msvc_64_build() {(
+msvc64_build() {(
 	ZIP="radare2-msvc_64-${VERSION}.zip"
 	builder="vs2015_64"
 	check "${ZIP}" && return
@@ -409,7 +409,7 @@ msvc_64_build() {(
 	rm "${ZIP}"
 )}
 
-msvc_32_build() {(
+msvc32_build() {(
 	ZIP="radare2-msvc_32-${VERSION}.zip"
 	builder="vs2015_32"
 	check "${ZIP}" && return
@@ -418,7 +418,7 @@ msvc_32_build() {(
 	rm "${ZIP}"
 )}
 
-msvc_64_installer() {(
+msvc64_installer() {(
 	EXE="radare2_installer-msvc_64-${VERSION}.exe"
 	builder="vs2015_64"
 	check "${EXE}" && return
@@ -427,7 +427,7 @@ msvc_64_installer() {(
 	rm "${EXE}"
 )}
 
-msvc_32_installer() {(
+msvc32_installer() {(
 	EXE="radare2_installer-msvc_32-${VERSION}.exe"
 	builder="vs2015_32"
 	check "${EXE}" && return
@@ -448,21 +448,18 @@ appveyor_download() {(
 		err "Cannot find latest appveyor release ..."
 		return
 	fi
-	jobid=$(echo "${latest_builds}" | sed -e "s/^.*jobId\":\"\(.*\)\",.*builder=${builder}.*/\1/")
+	jobid=$(echo "${latest_builds}" | sed -e "s/^.*jobId\":\"\(.*\)\",.*builder=${builder},.*/\1/")
 	msg "Found latest msvc jobid: ${jobid}"
 	res=$(curl -s "https://ci.appveyor.com/api/buildjobs/${jobid}/artifacts")
 	if [ -z "${installer}" ]; then
-		artifact_name=$(echo "${res}" | sed -e 's/^.*"fileName":"\(.*\.zip\)","type":.*/\1/')
-		if ! echo "${artifact_name}" | grep -q "radare2-${builder}-.*zip"; then
-		       	err "File name seems invalid: '${artifact_name}' ${res}. Exiting..."
-			return
-		fi
+		search="radare2-${builder}.*\\.zip"
 	else
-		artifact_name=$(echo "${res}" | sed -e 's/^.*"fileName":"\(.*\.exe\)","type":.*/\1/')
-		if ! echo "${artifact_name}" | grep -q "radare2_installer-${builder}.exe"; then
-		       	err "File name seems invalid: '${artifact_name}' ${res}. Exiting..."
-			return
-		fi
+		search="radare2_installer-${builder}.*\\.exe"
+	fi
+	artifact_name=$(echo "${res}" | sed -e 's/^.*"fileName":"\('${search}'\)","type":.*/\1/')
+	if ! echo "${artifact_name}" | grep -q "${search}"; then
+		err "File name seems invalid: '${artifact_name}' ${res}. Exiting..."
+		return
 	fi
 
 	# Download latest release
