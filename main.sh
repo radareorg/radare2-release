@@ -34,10 +34,10 @@ release_all() {
 
 	w32_build x86
 	#w64_build x64
-	msvc_32_build
-	msvc_64_build
-	msvc_32_installer
-	msvc_64_installer
+	msvc32_build
+	msvc64_build
+	msvc32_installer
+	msvc64_installer
 	docker_windows_build x86_64-w64-mingw32.static-gcc
 	# docker_windows_build i686-w64-mingw32.static-gcc
 
@@ -142,25 +142,27 @@ ios:
 -w32)
 	download radare2
 	w32_build x86
-	#docker_windows_build i686-w64-mingw32.static-gcc
 	exit 0
 	;;
 -w64)
 	download radare2
-	#w64_build x64
 	docker_windows_build x86_64-w64-mingw32.static-gcc
 	;;
--msvc_32_installer|msvc32_installer)
-	msvc_32_installer
+-msvc32_installer)
+	msvc32_installer
+	exit 0
 	;;
--msvc_64_installer|msvc64_installer)
-	msvc_64_installer
+-msvc64_installer)
+	msvc64_installer
+	exit 0
 	;;
--msvc_32|msvc32)
-	msvc_32_build
+-msvc32)
+	msvc32_build
+	exit 0
 	;;
--msvc_64|msvc64)
-	msvc_64_build
+-msvc64)
+	msvc64_build
+	exit 0
 	;;
 -osx)
 	download radare2
@@ -230,7 +232,8 @@ ios:
 	echo " -x [target] [arch] [mode]   run the build.sh target for given"
 	echo " -js, -ios, -osx, -and, -lin build for asmjs, iOS/OSX/Linux/Andrdo .. (EXPERIMENTAL)"
 	echo " -armv5 -mipsel              build armv5 linux debian packages"
-	echo " -msvc64, -w64, -w32         windows-specific things"
+	echo " -msvc64_installer, -msvc64  windows (msvc) specific things"
+	echo " -w64, -w32                  windows-specific things"
 	echo " -wasm                       build for web assembly (EXPERIMENTAL)"
 	echo " -r2frida                    build r2frida plugin for Debian (EXPERIMENTAL)"
 	echo
@@ -242,9 +245,6 @@ ios:
 	;;
 *)
 	target=`echo "$1" | sed -e s,-,_,g`
-	if [ "$target" = _msvc64 ]; then
-		target="w64_msvc"
-	fi
 	${target}_build $2 $3
 	;;
 esac
