@@ -18,11 +18,13 @@ output() {(
 )}
 
 prepare() {
-	namver="$1"
+	nam="$1"
+	ver="$2"
+	namver="$1-$2"
 	wrkdir="$2"
 	action="$3"
 	if [ ! -f "tmp/${namver}.tar.gz" ]; then
-		download radare2
+		download $nam $ver
 	fi
 	msg "Preparing ${namver} in ${wrkdir}..."
 	case "$action" in
@@ -44,7 +46,8 @@ prepare() {
 
 download() {(
 	repo="$1"
-	[ -z "${vers}" ] && vers="${VERSION}" || vers="$2"
+	vers="$2"
+	[ -z "${vers}" ] && vers="${VERSION}"
 	if [ -d "tmp/${repo}-${vers}" ]; then
 		msg "${repo}-${vers} tarball is ok"
 		return
@@ -78,12 +81,12 @@ android_build() {(
 	mkdir -p tmp
 	case "$mode" in
 	-s|--shell|shell|bash|sh)
-		prepare radare2-${VERSION} tmp/android-${arch} noclean
+		prepare radare2 ${VERSION} tmp/android-${arch} noclean
 		sys/android-shell.sh ${arch}
 		;;
 	*)
 		check radare2-${VERSION}-android-${arch}.tar.gz && return
-		prepare radare2-${VERSION} tmp/android-${arch} noclean
+		prepare radare2 ${VERSION} tmp/android-${arch} noclean
 		msg "Building android-${arch}..."
 		:> libr/libr.a
 		sys/android-build.sh ${arch} >> ${LOG}
@@ -108,12 +111,12 @@ osx_build() {(
 	mode="$2"
 	case "$mode" in
 	-s|--shell|shell|sh|bash)
-		prepare radare2-${VERSION} tmp/osx-pkg
+		prepare radare2 ${VERSION} tmp/osx-pkg
 		bash
 		;;
 	*)
 		check radare2-${VERSION}.pkg && return
-		prepare radare2-${VERSION} tmp/osx-pkg
+		prepare radare2 ${VERSION} tmp/osx-pkg
 		msg "Building macOS package..."
 		sys/osx-pkg.sh >> ${LOG}
 		ls sys/osx-pkg
@@ -127,12 +130,12 @@ linux_build() {(
 	mode="$2"
 	case "$mode" in
 	-s|--shell|shell|bash|sh)
-		prepare radare2-${VERSION} tmp/linux-${arch}
+		prepare radare2 ${VERSION} tmp/linux-${arch}
 		bash
 		;;
 	*)
 		check radare2-${VERSION}-${arch}.deb && return
-		prepare radare2-${VERSION} tmp/linux-${arch}
+		prepare radare2 ${VERSION} tmp/linux-${arch}
 		msg "Building Debian GNU/Linux package..."
 		sys/debian.sh >> ${LOG}
 		output sys/debian/radare2/*.deb
@@ -140,8 +143,17 @@ linux_build() {(
 	esac
 )}
 
+r2b_build() {
+	echo "[*] Pre-generating radare2-bindings ${VERSION_BNDNGS} ..."
+	check radare2-bindings-${VERSION_BNDNGS}.tar.gz && return
+	prepare radare2-bindings ${VERSION_BNDNGS} tmp/radare2-bindings noclean
+	# TODO: create a new make target that just creates the .cxx files and not compile them
+	./configure ; cd python && make
+	# TODO: generate tarball with different name :? radare2-bindings-(something)
+}
+
 # debian-x86_64_r2frida
-R2FRIDA_VERSION=1.8
+R2FRIDA_VERSION=1.9.0
 docker_linux_r2frida_build() {(
 	arch="x64"
 	mode="$2"
@@ -153,7 +165,7 @@ docker_linux_r2frida_build() {(
 	*)
 		msg "Building amd64 Debian GNU/Linux r2frida package..."
 		# XXX r2frida version hardcoded
-		check r2frida_${R2FRIDA_VERION}_amd64.deb && return
+		check r2frida_${R2FRIDA_VERSION}_amd64.deb && return
 		if [ -d tmp/r2frida ]; then
 			( cd tmp/r2frida ; git pull )
 		else
@@ -175,7 +187,7 @@ docker_android_build() {(
 	ANDROID_PREFIX="/data/data/org.radare.radare2installer/radare2"
 	case "$mode" in
 	-s|--shell|shell|bash|sh)
-		prepare radare2-${VERSION} tmp/android-${arch}
+		prepare radare2 ${VERSION} tmp/android-${arch}
 		${CWD}/dockcross --image dockcross/android-${arch} \
 			./configure \
 				--host="linux-android-${arch}" \
@@ -187,7 +199,7 @@ docker_android_build() {(
 		;;
 	*|static)
 		check radare2-${VERSION}-android-${arch}.tar.gz && return
-		prepare radare2-${VERSION} tmp/android-${arch} noclean
+		prepare radare2 ${VERSION} tmp/android-${arch} noclean
 		${CWD}/dockcross --image dockcross/android-${arch} \
 			./configure \
 				--host="linux-android-${arch}" \
@@ -232,7 +244,7 @@ docker_linux_build() {(
 		;;
 	esac
 	check radare2_${VERSION}_${debarch}.deb && return
-	prepare radare2-${VERSION} tmp/debian-${debarch}
+	prepare radare2 ${VERSION} tmp/debian-${debarch}
 	case "$arg" in
 	static)
 		${CWD}/dockcross --image dockcross/linux-${arch} \
@@ -262,12 +274,12 @@ docker_asmjs_build() {(
 	X=radare2-${VERSION}-${arch}
 	case "$mode" in
 	-s|--shell|shell|bash|sh)
-		prepare radare2-${VERSION} tmp/radare2-asmjs noclean
+		prepare radare2 ${VERSION} tmp/radare2-asmjs noclean
 		${CWD}/dockcross --image dockcross/browser-asmjs bash
 		;;
 	*)
 		check "$X".tar.gz && return
-		prepare radare2-${VERSION} tmp/radare2-asmjs noclean
+		prepare radare2 ${VERSION} tmp/radare2-asmjs noclean
 		${CWD}/dockcross --image dockcross/browser-asmjs sys/emscripten.sh
 		rm -rf "$X"
 		mkdir -p "$X"
@@ -285,12 +297,12 @@ docker_wasm_build() {(
 	X=radare2-${VERSION}-${arch}
 	case "$mode" in
 	-s|--shell|shell|bash|sh)
-		prepare radare2-${VERSION} tmp/radare2-wasm noclean
+		prepare radare2 ${VERSION} tmp/radare2-wasm noclean
 		${CWD}/dockcross --image dockcross/browser-asmjs bash
 		;;
 	*)
 		check "$X".tar.gz && return
-		prepare radare2-${VERSION} tmp/radare2-wasm noclean
+		prepare radare2 ${VERSION} tmp/radare2-wasm noclean
 		${CWD}/dockcross --image dockcross/browser-asmjs sys/wasm.sh
 		rm -rf "$X"
 		mkdir -p "$X"
@@ -312,14 +324,14 @@ docker_windows_build() {(
 	*)
 		if [ "${arch}" = "x86_64-w64-mingw32.static-gcc" ]; then
 			check radare2-w64-${VERSION}.zip && return
-			prepare radare2-${VERSION} tmp/windows-x64
+			prepare radare2 ${VERSION} tmp/windows-x64
 			${CWD}/dockcross --image dockcross/windows-x64 bash -c "
 				./configure --with-compiler=${arch} --host=${arch} &&
 				make -j4 && make w64dist"
 			output radare2-w64-${VERSION}.zip
 		else
 			check radare2-w32-${VERSION}.zip && return
-			prepare radare2-${VERSION} tmp/windows-x32
+			prepare radare2 ${VERSION} tmp/windows-x32
 			${CWD}/dockcross --image dockcross/windows-x64 bash -c "
 				./configure --with-compiler=${arch} --host=${arch} &&
 				make -j4 && make w32dist"
@@ -333,7 +345,7 @@ ios_appstore() {(
 	arch="$1"
 	[ -z "$1" ] && arch="arm64"
 	check radare2-ios-${arch}-${VERSION}.tar.gz && return
-	prepare radare2-${VERSION} tmp/ios-appstore
+	prepare radare2 ${VERSION} tmp/ios-appstore
 	msg "Building for the iOS appstore..."
 	sys/ios-static-appstore.sh >> ${LOG}
 	find *| grep gz$
@@ -346,7 +358,7 @@ ios_build() {(
 	mode="$2"
 	case "$mode" in
 	-s|--shell|shell|sh|bash)
-		prepare radare2-${VERSION} tmp/ios-cydia-${arch}
+		prepare radare2 ${VERSION} tmp/ios-cydia-${arch}
 		sys/ios-sdk.sh -s
 		exit 0
 		;;
@@ -363,7 +375,7 @@ ios_build() {(
 		DD=radare2-dev_$S
 	fi
 	check $D && return
-	prepare radare2-${VERSION} tmp/ios-cydia-${arch}
+	prepare radare2 ${VERSION} tmp/ios-cydia-${arch}
 	msg "Building ios-${arch}..."
 	$C >> ${LOG}
 	cp -f sys/cydia/radare2/$O $D
@@ -380,7 +392,7 @@ w32_build() {(
 		return w64_build $arch $mode
 	fi
 	check radare2-w32-${VERSION}.zip && return
-	prepare radare2-${VERSION} tmp/mingw32
+	prepare radare2 ${VERSION} tmp/mingw32
 	msg "Building mingw32 zip..."
 	sys/mingw32.sh >> ${LOG}
 	output radare2-w32-${VERSION}.zip
@@ -394,7 +406,7 @@ w64_build() {(
 		return w32_build $arch $mode
 	fi
 	check radare2-w64-${VERSION}.zip && return
-	prepare radare2-${VERSION} tmp/mingw64
+	prepare radare2 ${VERSION} tmp/mingw64
 	msg "Building mingw64 zip..."
 	sys/mingw64.sh >> ${LOG} || echo 'missing mingw64 compiler'
 	output radare2-w64-${VERSION}.zip

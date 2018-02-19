@@ -113,6 +113,10 @@ ios:
 	arm64
 "
 	;;
+-r2b)
+	r2b_build
+	exit 0
+	;;
 -js)
 	download radare2
 	docker_asmjs_build
@@ -223,6 +227,7 @@ ios:
 	echo "Usage: ./main.sh [release|init|...]"
 	echo " -a                          release all default targets"
 	echo " -p                          publish out directory"
+	echo " -r2b                        pregenerated swig radare2-bindings"
 	echo " -pa,--pub-and               publish android builds in the radare2-bin repo"
 	echo " -n, -notes                  generate release notes"
 	echo " -pw                         publish into radare.org"
