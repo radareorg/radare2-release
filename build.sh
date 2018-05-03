@@ -243,7 +243,8 @@ docker_linux_build() {(
 		cmparch="mipsel"
 		;;
 	esac
-	check radare2_${VERSION}_${debarch}.deb && return
+	check radare2_${VERSION}_${debarch}.deb
+	check radare2-dev_${VERSION}_${debarch}.deb && return
 	prepare radare2 ${VERSION} tmp/debian-${debarch}
 	case "$arg" in
 	static)
@@ -263,6 +264,7 @@ docker_linux_build() {(
 			export MAKE='make V=1' ;
 			./configure ${CFGARGS} --prefix=/usr --host=${cmparch}-linux-gnu && make -j4 V=1 && sys/debian.sh"
 		output sys/debian/radare2/*.deb
+		output sys/debian/radare2-dev/*.deb
 		;;
 	esac
 )}
