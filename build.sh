@@ -171,10 +171,17 @@ docker_linux_r2frida_build() {(
 			git clone --depth 20 https://github.com/nowsecure/r2frida tmp/r2frida
 		fi
 		(
+			cp -f out/2.9.0/radare2_2.9.0_amd64.deb tmp/r2frida
+			cp -f out/2.9.0/radare2-dev_2.9.0_amd64.deb tmp/r2frida
 			cd tmp/r2frida
-			make clean ; make -j4
-			cd dist/debian
-			make >> ${LOG}
+			${CWD}/dockcross --image dockcross/linux-${arch} bash -c \
+			"export CFLAGS=-O2 ;
+			export ARCH=${debarch} ;
+			export MAKE='make V=1' ; 
+			sudo dpkg -i radare2_2.9.0_amd64.deb ;
+			sudo dpkg -i radare2-dev_2.9.0_amd64.deb ;
+			make -j2"
+			cd dist/debian && make purge && make >> ${LOG}
 		)
 		output tmp/r2frida/dist/debian/*.deb
 		;;
