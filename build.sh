@@ -152,8 +152,6 @@ r2b_build() {
 	# TODO: generate tarball with different name :? radare2-bindings-(something)
 }
 
-# debian-x86_64_r2frida
-R2FRIDA_VERSION=1.9.0
 docker_linux_r2frida_build() {(
 	arch="x64"
 	mode="$2"
@@ -173,7 +171,9 @@ docker_linux_r2frida_build() {(
 			git clone --depth 20 https://github.com/nowsecure/r2frida tmp/r2frida
 		fi
 		(
-			cd tmp/r2frida/dist/debian
+			cd tmp/r2frida
+			make clean ; make -j4
+			cd dist/debian
 			make >> ${LOG}
 		)
 		output tmp/r2frida/dist/debian/*.deb

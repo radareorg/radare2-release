@@ -55,6 +55,8 @@ release_all() {
 		;;
 	esac
 
+        docker_linux_r2frida_build x64
+
 	publish_checksums
 
 	### populate all binaries
@@ -72,7 +74,7 @@ release_all() {
 
 case "$1" in
 -r2frida)
-        docket_linux_r2frida_build x64
+        docker_linux_r2frida_build x64
 	;;
 -armv5)
         docker_linux_build armv5
