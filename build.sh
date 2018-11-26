@@ -178,6 +178,7 @@ docker_linux_r2frida_build() {(
 			"export CFLAGS=-O2 ;
 			export ARCH=${debarch} ;
 			export MAKE='make V=1' ; 
+			sudo apt install nodejs ;
 			sudo dpkg -i radare2_${VERSION}_amd64.deb ;
 			sudo dpkg -i radare2-dev_${VERSION}_amd64.deb ;
 			make -j2"
