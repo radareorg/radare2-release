@@ -15,6 +15,9 @@ output() {(
 	file="$1"
 	mkdir -p "${CWD}/out/${VERSION}"
 	cp -f "${file}" "${CWD}/out/${VERSION}" || exit 1
+	cd "${CWD}/"out/${VERSION}
+	rm -f checksums.sha1sum
+	sha1sum * > checksums.sha1sum
 )}
 
 prepare() {
@@ -163,7 +166,7 @@ docker_linux_r2frida_build() {(
 	*)
 		msg "Building amd64 Debian GNU/Linux r2frida package..."
 		# XXX r2frida version hardcoded
-		check r2frida_${R2FRIDA_VERSION}_amd64.deb && return
+		check r2frida_${VERSION_R2FRIDA}_amd64.deb && return
 		if [ -d tmp/r2frida ]; then
 			( cd tmp/r2frida ; git pull )
 		else
