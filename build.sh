@@ -177,12 +177,16 @@ docker_linux_r2frida_build() {(
 			${CWD}/dockcross --image dockcross/linux-${arch} bash -c \
 			"export CFLAGS=-O2 ;
 			export ARCH=${debarch} ;
-			export MAKE='make V=1' ; 
-			sudo apt install nodejs ;
+			sudo apt update ;
+			curl -sL https://deb.nodesource.com/setup_10.x | sudo bash - ;
+			sudo apt install -y nodejs libssl-dev ;
+			node --version ;
 			sudo dpkg -i radare2_${VERSION}_amd64.deb ;
 			sudo dpkg -i radare2-dev_${VERSION}_amd64.deb ;
-			make -j2"
-			cd dist/debian && make purge && make >> ${LOG}
+			echo 'starting the r2frida build...';
+			make V=1"
+			cd dist/debian && make purge && make
+			# >> ${LOG}
 		)
 		output tmp/r2frida/dist/debian/*.deb
 		;;
