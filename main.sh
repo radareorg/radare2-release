@@ -15,6 +15,7 @@ release_all() {
 
 	# docker_linux_build x86 static
 	# TODO: dockerify
+	android_app
 	android_build x86
 	android_build mips
 	android_build arm
@@ -73,6 +74,9 @@ release_all() {
 }
 
 case "$1" in
+-app)
+	android_app
+	;;
 -r2frida)
         docker_linux_r2frida_build x64
 	;;
