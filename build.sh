@@ -238,6 +238,7 @@ docker_linux_build() {(
 	[ -z "$arch" ] && arch="x86"
 	debarch="$arch"
 	cmparch="$arch"
+	useabi="gnu"
 	case "$arch" in
 	x86)
 		debarch="i686"
@@ -246,6 +247,11 @@ docker_linux_build() {(
 	x64)
 		debarch="amd64"
 		cmparch="x86_64"
+		;;
+	arm64)
+		debarch="arm64"
+		cmparch="aarch64-unknown"
+		useabi="gnueabi"
 		;;
 	armv5)
 		CFGARGS="--with-compiler=${arch}"
@@ -271,9 +277,12 @@ docker_linux_build() {(
 		${CWD}/dockcross --image dockcross/linux-${arch} bash
 		;;
 	*)
+		S='$'
 		${CWD}/dockcross --image dockcross/linux-${arch} bash -c \
-			"export AR=${cmparch}-linux-gnu-ar ;
-			export CC=${cmparch}-linux-gnu-gcc ;
+			"export AR=${cmparch}-linux-${useabi}-ar ;
+			export CC=${cmparch}-linux-${useabi}-gcc ;
+			export PATH=\"/usr/xcc/${cmparch}-linux-${useabi}/bin:${S}PATH\" ;
+			echo "CC=${S}CC" ;
 			export CFLAGS=-O2 ;
 			export ARCH=${debarch} ;
 			export MAKE='make V=1' ;
