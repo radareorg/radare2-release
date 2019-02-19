@@ -34,13 +34,13 @@ release_all() {
 	#docker_linux_build mipsel
 	docker_linux_build mipsel static
 
-	w32_build x86
+	#w32_build x86
 	#w64_build x64
 	msvc32_build
 	msvc64_build
 	msvc32_installer
 	msvc64_installer
-	docker_windows_build x86_64-w64-mingw32.static-gcc
+	#docker_windows_build x86_64-w64-mingw32.static-gcc
 	# docker_windows_build i686-w64-mingw32.static-gcc
 
 	case "`uname`" in
