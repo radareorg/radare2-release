@@ -173,17 +173,28 @@ docker_linux_r2frida_build() {(
 			mkdir -p tmp
 			git clone --depth 20 https://github.com/nowsecure/r2frida tmp/r2frida
 		fi
+		# echo 'deb [check-valid-until=no] http://archive.debian.org/debian jessie-backports main' > x;
+		# sudo mv x /etc/apt/sources.list.d/jessie-backports.list ; \
+		# sed '/deb http:\/\/deb.debian.org\/debian jessie-updates main/d' < /etc/apt/sources.list > x ; \
+		# sudo mv x /etc/apt/sources.list ; \
+		# sudo apt-get -o Acquire::Check-Valid-Until=false update ;
+		#curl -sL https://deb.nodesource.com/setup_10.x | sudo bash - ;
+		#	curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | sudo apt-key add - ;
+		#	sudo apt-key update ; 
+		#	sudo apt-get dist-upgrade ;
 		(
 			cp -f out/${VERSION}/radare2_${VERSION}_amd64.deb tmp/r2frida
 			cp -f out/${VERSION}/radare2-dev_${VERSION}_amd64.deb tmp/r2frida
+			export NODE_VERSION=10.15.3
+			export ARCH=x64
 			cd tmp/r2frida
 			${CWD}/dockcross --image dockcross/linux-${arch} bash -c \
 			"export CFLAGS=-O2 ;
 			export ARCH=${debarch} ;
-			sudo apt update ;
-			curl -sL https://deb.nodesource.com/setup_10.x | sudo bash - ;
-			sudo apt install -y nodejs libssl-dev ;
-			node --version ;
+			sudo apt-get install -y libssl-dev curl ;
+			curl -fsSLO --compressed https://nodejs.org/dist/v{$NODE_VERSION}/node-v${NODE_VERSION}-linux-${ARCH}.tar.xz ;
+			sudo tar -xJf node-v${NODE_VERSION}-linux-${ARCH}.tar.xz -C /usr/ --strip-components=1 --no-same-owner ;
+			node --version || exit 1;
 			sudo dpkg -i radare2_${VERSION}_amd64.deb ;
 			sudo dpkg -i radare2-dev_${VERSION}_amd64.deb ;
 			echo 'starting the r2frida build...';
