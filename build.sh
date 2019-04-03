@@ -155,6 +155,48 @@ r2b_build() {
 	# TODO: generate tarball with different name :? radare2-bindings-(something)
 }
 
+docker_linux_r2dec_build() {(
+	arch="x64"
+	mode="$2"
+	case "$mode" in
+	-s|--shell|shell|bash|sh)
+		echo "No shell here"
+		exit 0
+		;;
+	*)
+		msg "Building amd64 Debian GNU/Linux r2dec package..."
+		check r2dec_${VERSION_R2DEC}_amd64.deb && return
+		if [ -d tmp/r2dec ]; then
+			( cd tmp/r2dec ; git pull )
+		else
+			mkdir -p tmp
+			git clone --depth 20 https://github.com/wargio/r2dec-js tmp/r2dec
+		fi
+		(
+			cp -f out/${VERSION}/radare2_${VERSION}_amd64.deb tmp/r2dec
+			cp -f out/${VERSION}/radare2-dev_${VERSION}_amd64.deb tmp/r2dec
+			export NODE_VERSION=10.15.3
+			export ARCH=x64
+			cd tmp/r2frida
+			${CWD}/dockcross --image dockcross/linux-${arch} bash -c \
+			"export CFLAGS=-O2 ;
+			export ARCH=${debarch} ;
+			sudo apt-get install -y curl ;
+			curl -fsSLO --compressed https://nodejs.org/dist/v{$NODE_VERSION}/node-v${NODE_VERSION}-linux-${ARCH}.tar.xz ;
+			sudo tar -xJf node-v${NODE_VERSION}-linux-${ARCH}.tar.xz -C /usr/ --strip-components=1 --no-same-owner ;
+			node --version || exit 1;
+			sudo dpkg -i radare2_${VERSION}_amd64.deb ;
+			sudo dpkg -i radare2-dev_${VERSION}_amd64.deb ;
+			echo 'starting the r2dec build...';
+			cd p/dist/debian ;
+			make purge ;
+			make"
+		)
+		output tmp/r2dec/p/dist/debian/r2dec*.deb
+		;;
+	esac
+)}
+
 docker_linux_r2frida_build() {(
 	arch="x64"
 	mode="$2"

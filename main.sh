@@ -58,6 +58,7 @@ release_all() {
 	esac
 
         docker_linux_r2frida_build x64
+        docker_linux_r2dec_build x64
 
 	publish_checksums
 
@@ -77,6 +78,9 @@ release_all() {
 case "$1" in
 -app)
 	android_app
+	;;
+-r2dec)
+        docker_linux_r2dec_build x64
 	;;
 -r2frida)
         docker_linux_r2frida_build x64
