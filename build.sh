@@ -232,6 +232,7 @@ docker_linux_r2frida_build() {(
 			cd tmp/r2frida
 			${CWD}/dockcross --image dockcross/linux-${arch} bash -c \
 			"export CFLAGS=-O2 ;
+			export VERSION=${VERSION} ; 
 			export ARCH=${debarch} ;
 			sudo apt-get install -y libssl-dev curl ;
 			curl -fsSLO --compressed https://nodejs.org/dist/v{$NODE_VERSION}/node-v${NODE_VERSION}-linux-${ARCH}.tar.xz ;
