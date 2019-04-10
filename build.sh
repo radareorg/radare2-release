@@ -528,6 +528,7 @@ msvc32_installer() {(
 	rm "${EXE}"
 )}
 
+# TODO: improve this script, there are many ways to make it fail
 appveyor_download() {(
 	OUTFILE=$1
 	builder=$2
@@ -540,7 +541,7 @@ appveyor_download() {(
 		err "Cannot find latest appveyor release ..."
 		return
 	fi
-	jobid=$(echo "${latest_builds}" | sed -e "s/^.*jobId\":\"\(.*\)\",.*builder=${builder},.*/\1/")
+	jobid=$(echo "${latest_builds}" | jq -r .build.jobs[0].jobId)
 	msg "Found latest msvc jobid: ${jobid}"
 	res=$(curl -s "https://ci.appveyor.com/api/buildjobs/${jobid}/artifacts")
 	if [ -z "${installer}" ]; then
@@ -548,8 +549,8 @@ appveyor_download() {(
 	else
 		search="radare2_installer-${builder}.*\\.exe"
 	fi
-	artifact_name=$(echo "${res}" | sed -e 's/^.*"fileName":"\('${search}'\)","type":.*/\1/')
-	if ! echo "${artifact_name}" | grep -q "${search}"; then
+	artifact_name=$(echo "${res}" | jq -r .[0].fileName)
+	if ! echo "${artifact_name}" | grep -q "zip"; then
 		err "File name seems invalid: '${artifact_name}' ${res}. Exiting..."
 		return
 	fi
