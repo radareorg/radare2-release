@@ -17,7 +17,7 @@ release_all() {
 	# TODO: dockerify
 	android_app
 	android_build x86
-	android_build mips
+	# android_build mips
 	android_build arm
 	android_build aarch64
 
