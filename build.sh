@@ -494,16 +494,7 @@ w64_build() {(
 
 msvc64_build() {(
 	ZIP="radare2-msvc_64-${VERSION}.zip"
-	builder="vs2015_64"
-	check "${ZIP}" && return
-	appveyor_download ${ZIP} ${builder}
-	output "${ZIP}"
-	rm "${ZIP}"
-)}
-
-msvc32_build() {(
-	ZIP="radare2-msvc_32-${VERSION}.zip"
-	builder="vs2015_32"
+	builder="vs2017_64"
 	check "${ZIP}" && return
 	appveyor_download ${ZIP} ${builder}
 	output "${ZIP}"
@@ -512,16 +503,7 @@ msvc32_build() {(
 
 msvc64_installer() {(
 	EXE="radare2_installer-msvc_64-${VERSION}.exe"
-	builder="vs2015_64"
-	check "${EXE}" && return
-	appveyor_download ${EXE} ${builder} 1
-	output "${EXE}"
-	rm "${EXE}"
-)}
-
-msvc32_installer() {(
-	EXE="radare2_installer-msvc_32-${VERSION}.exe"
-	builder="vs2015_32"
+	builder="vs2017_64"
 	check "${EXE}" && return
 	appveyor_download ${EXE} ${builder} 1
 	output "${EXE}"
