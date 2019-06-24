@@ -177,7 +177,8 @@ docker_linux_r2dec_build() {(
 			cp -f out/${VERSION}/radare2-dev_${VERSION}_amd64.deb tmp/r2dec
 			export NODE_VERSION=10.15.3
 			export ARCH=x64
-			cd tmp/r2frida
+			cd tmp/r2dec
+if [ 1 = 0 ]; then
 			${CWD}/dockcross --image dockcross/linux-${arch} bash -c \
 			"export CFLAGS=-O2 ;
 			export ARCH=${debarch} ;
@@ -186,11 +187,12 @@ docker_linux_r2dec_build() {(
 			sudo tar -xJf node-v${NODE_VERSION}-linux-${ARCH}.tar.xz -C /usr/ --strip-components=1 --no-same-owner ;
 			node --version || exit 1;
 			sudo dpkg -i radare2_${VERSION}_amd64.deb ;
-			sudo dpkg -i radare2-dev_${VERSION}_amd64.deb ;
-			echo 'starting the r2dec build...';
-			cd p/dist/debian ;
-			make purge ;
-			make"
+			sudo dpkg -i radare2-dev_${VERSION}_amd64.deb"
+fi
+			(
+				cd p/dist/debian
+				make -j4
+			)
 		)
 		output tmp/r2dec/p/dist/debian/r2dec*.deb
 		;;
