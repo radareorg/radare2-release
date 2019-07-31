@@ -513,6 +513,22 @@ msvc64_installer() {(
 )}
 
 # TODO: improve this script, there are many ways to make it fail
+download_artifact() {
+	jobid=$1
+	artifact_name=$2
+	OUTFILE=$3
+	res=$4
+
+	if ! echo "${artifact_name}" | grep -q -e "zip" -e "exe"; then
+		err "File name seems invalid: '${artifact_name}' ${res}. Exiting..."
+		return
+	fi
+
+	# Download latest release
+	curl -L "https://ci.appveyor.com/api/buildjobs/${jobid}/artifacts/${artifact_name}" -o "${OUTFILE}"
+
+}
+
 appveyor_download() {(
 	OUTFILE=$1
 	builder=$2
@@ -530,17 +546,14 @@ appveyor_download() {(
 	res=$(curl -s "https://ci.appveyor.com/api/buildjobs/${jobid}/artifacts")
 	if [ -z "${installer}" ]; then
 		search="radare2-${builder}.*\\.zip"
+		artifact_index=0
 	else
 		search="radare2_installer-${builder}.*\\.exe"
+		artifact_index=1
 	fi
-	artifact_name=$(echo "${res}" | jq -r .[0].fileName)
-	if ! echo "${artifact_name}" | grep -q "zip"; then
-		err "File name seems invalid: '${artifact_name}' ${res}. Exiting..."
-		return
-	fi
-
+	artifact_name=$(echo "${res}" | jq -r .[${artifact_index}].fileName)
 	# Download latest release
-	curl -L "https://ci.appveyor.com/api/buildjobs/${jobid}/artifacts/${artifact_name}" -o "${OUTFILE}"
+	download_artifact "${jobid}" "${artifact_name}" "${OUTFILE}" "${res}"
 )}
 
 depends() {
