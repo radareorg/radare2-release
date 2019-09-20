@@ -217,6 +217,11 @@ docker_linux_r2frida_build() {(
 			mkdir -p tmp
 			git clone --depth 20 https://github.com/nowsecure/r2frida tmp/r2frida
 		fi
+		(
+			cd tmp/r2frida
+			git submodule init
+			git submodule update
+		)
 		# echo 'deb [check-valid-until=no] http://archive.debian.org/debian jessie-backports main' > x;
 		# sudo mv x /etc/apt/sources.list.d/jessie-backports.list ; \
 		# sed '/deb http:\/\/deb.debian.org\/debian jessie-updates main/d' < /etc/apt/sources.list > x ; \
@@ -229,7 +234,7 @@ docker_linux_r2frida_build() {(
 		(
 			cp -f out/${VERSION}/radare2_${VERSION}_amd64.deb tmp/r2frida
 			cp -f out/${VERSION}/radare2-dev_${VERSION}_amd64.deb tmp/r2frida
-			export NODE_VERSION=10.15.3
+			export NODE_VERSION=10.16.3
 			export ARCH=x64
 			cd tmp/r2frida
 			${CWD}/dockcross --image dockcross/linux-${arch} bash -c \
