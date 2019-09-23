@@ -540,7 +540,7 @@ appveyor_download() {(
 	installer=$3
 
 	# Retrieve latest msvc release information
-	latest_builds=$(curl -s "https://ci.appveyor.com/api/projects/radare/radare2-shvdd")
+	latest_builds=$(curl -s "https://ci.appveyor.com/api/projects/radare/radare2")
 	# TODO Maybe the api can force the branch
 	if ! echo "${latest_builds}" | grep -q '"branch":"master"'; then
 		err "Cannot find latest appveyor release ..."
