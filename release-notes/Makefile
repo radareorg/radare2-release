@@ -4,7 +4,7 @@ all: node_modules radare2
 	cd radare2 ; node ..
 
 radare2:
-	git clone https://github.com/radare/radare2
+	git clone https://github.com/radareorg/radare2
 
 node_modules:
 	yarn

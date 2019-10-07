@@ -222,7 +222,7 @@ function computeRanking(o) {
 function computeRepairs(o) {
   let r = [];
   o.fixes.forEach(function(elem) {
-    r.push("[#" + elem + "](https://github.com/radare/radare2/issues/" + elem + ")");
+    r.push("[#" + elem + "](https://github.com/radareorg/radare2/issues/" + elem + ")");
   });
   return {
     count: Object.keys(o.fixes).length,
@@ -357,7 +357,7 @@ function main() {
   console.log('Codename: ' + codeName);
   console.log('Date: ' + new Date().toString());
   console.log('Website: http://radare.org');
-  console.log('Tarball: https://github.com/radare/radare2/releases');
+  console.log('Tarball: https://github.com/radareorg/radare2/releases');
   console.log('Builds: http://cloud.rada.re/get/' + curVersion);
   console.log();
 
