@@ -41,7 +41,7 @@ release_all() {
 	#docker_windows_build x86_64-w64-mingw32.static-gcc
 	# docker_windows_build i686-w64-mingw32.static-gcc
 
-	case "`uname`" in
+	case "$(uname)" in
 	Darwin)
 		osx_build
 		ios_build arm
@@ -87,7 +87,7 @@ case "$1" in
         docker_linux_build armv5
 	;;
 -mipsel)
-        docker_linux_build mipsel $2
+        docker_linux_build mipsel "$2"
 	;;
 -l)
 	echo "
@@ -185,20 +185,20 @@ ios:
 	;;
 -lin64)
 	download radare2
-	docker_linux_build x64 $2
+	docker_linux_build x64 "$2"
 	exit 0
 	;;
 -x)
 	if [ -z "$2" ]; then
 		cat build.sh | grep '()' | grep build | awk -F '_build' '{print $1}'
 	else
-		target=`echo "$2" | sed -e s,-,_,g`
-		${target}_build $3 $4
+		target=$(echo "$2" | sed -e s,-,_,g)
+		"${target}_build" "$3" "$4"
 	fi
 	exit 0
 	;;
 -n|-notes|--notes)
-	cd release-notes
+	cd release-notes || exit 1
 	$EDITOR config.json
 	make | tee notes.txt
 	echo "See notes.txt"
@@ -248,8 +248,8 @@ ios:
 	exit 0
 	;;
 *)
-	target=`echo "$1" | sed -e s,-,_,g`
-	${target}_build $2 $3
+	target=$(echo "$1" | sed -e s,-,_,g)
+	"${target}_build" "$2" "$3"
 	;;
 esac
 
