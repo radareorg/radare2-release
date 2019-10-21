@@ -15,9 +15,9 @@ output() {(
 	file="$1"
 	mkdir -p "${CWD}/out/${VERSION}"
 	cp -f "${file}" "${CWD}/out/${VERSION}" || exit 1
-	cd "${CWD}/"out/${VERSION}
+	cd "${CWD}/out/${VERSION}" || exit 1
 	rm -f checksums.sha1sum
-	sha1sum * > checksums.sha1sum
+	sha1sum -- * > checksums.sha1sum
 )}
 
 prepare() {
@@ -27,7 +27,7 @@ prepare() {
 	wrkdir="$2"
 	action="$3"
 	if [ ! -f "tmp/${namver}.tar.gz" ]; then
-		download $nam $ver
+		download "$nam" "$ver"
 	fi
 	msg "Preparing ${namver} in ${wrkdir}..."
 	case "$action" in
@@ -57,25 +57,25 @@ download() {(
 	fi
 	msg "Downloading ${repo} ${vers}"
 	mkdir -p tmp
-	cd tmp
-	wget -O orig-${repo}-${vers}.tar.gz -qc "https://github.com/radare/${repo}/archive/${vers}.tar.gz" || exit 1
+	cd tmp || exit 1
+	wget -O "orig-${repo}-${vers}.tar.gz" -qc "https://github.com/radareorg/${repo}/archive/${vers}.tar.gz" || exit 1
 	msg "Caching capstone clone in a new dist tarball"
-	tar xzf orig-${repo}-${vers}.tar.gz
+	tar xzf "orig-${repo}-${vers}.tar.gz"
 	if [ "$repo" = radare2 ]; then
 		(
-			cd "${repo}-${vers}"
+			cd "${repo}-${vers}" || exit 1
 			./configure > /dev/null
 			(
-				cd shlr
+				cd shlr || exit 1
 				make capstone
 				rm -rf capstone/.git
 			)
 		)
-		tar czf ${repo}-${vers}.tar.gz ${repo}-${vers}
+		tar czf "${repo}-${vers}.tar.gz ${repo}-${vers}"
 	else
-		cp -f orig-${repo}-${vers}.tar.gz ${repo}-${vers}.tar.gz
+		cp -f "orig-${repo}-${vers}.tar.gz" "${repo}-${vers}.tar.gz"
 	fi
-	output ${repo}-${vers}.tar.gz
+	output "${repo}-${vers}.tar.gz"
 )}
 
 android_build() {(
@@ -84,16 +84,16 @@ android_build() {(
 	mkdir -p tmp
 	case "$mode" in
 	-s|--shell|shell|bash|sh)
-		prepare radare2 ${VERSION} tmp/android-${arch} noclean
-		sys/android-shell.sh ${arch}
+		prepare radare2 "${VERSION}" "tmp/android-${arch}" noclean
+		sys/android-shell.sh "${arch}"
 		;;
 	*)
-		check radare2-${VERSION}-android-${arch}.tar.gz && return
-		prepare radare2 ${VERSION} tmp/android-${arch} noclean
+		check "radare2-${VERSION}-android-${arch}.tar.gz" && return
+		prepare radare2 "${VERSION}" "tmp/android-${arch}" noclean
 		msg "Building android-${arch}..."
 		:> libr/libr.a
-		sys/android-build.sh ${arch} >> ${LOG}
-		output radare2-${VERSION}-android-${arch}.tar.gz
+		sys/android-build.sh "${arch}" >> "${LOG}"
+		output "radare2-${VERSION}-android-${arch}.tar.gz"
 		;;
 	esac
 )}
@@ -107,40 +107,40 @@ check() {
 }
 
 osx_build() {(
-	if [ "`uname`" != "Darwin" ]; then
+	if [ "$(uname)" != "Darwin" ]; then
 		echo "osx_build is only suposed to run on macOS"
 		return 1
 	fi
 	mode="$2"
 	case "$mode" in
 	-s|--shell|shell|sh|bash)
-		prepare radare2 ${VERSION} tmp/osx-pkg
+		prepare radare2 "${VERSION}" tmp/osx-pkg
 		bash
 		;;
 	*)
-		check radare2-${VERSION}.pkg && return
-		prepare radare2 ${VERSION} tmp/osx-pkg
+		check "radare2-${VERSION}.pkg" && return
+		prepare radare2 "${VERSION}" tmp/osx-pkg
 		msg "Building macOS package..."
-		sys/osx-pkg.sh >> ${LOG}
+		sys/osx-pkg.sh >> "${LOG}"
 		ls sys/osx-pkg
-		output sys/osx-pkg/radare2-${VERSION}.pkg
+		output "sys/osx-pkg/radare2-${VERSION}.pkg"
 		;;
 	esac
 )}
 
 linux_build() {(
-	arch="`uname -m`"
+	arch="$(uname -m)"
 	mode="$2"
 	case "$mode" in
 	-s|--shell|shell|bash|sh)
-		prepare radare2 ${VERSION} tmp/linux-${arch}
+		prepare radare2 "${VERSION}" "tmp/linux-${arch}"
 		bash
 		;;
 	*)
-		check radare2-${VERSION}-${arch}.deb && return
-		prepare radare2 ${VERSION} tmp/linux-${arch}
+		check "radare2-${VERSION}-${arch}.deb" && return
+		prepare radare2 "${VERSION}" "tmp/linux-${arch}"
 		msg "Building Debian GNU/Linux package..."
-		sys/debian.sh >> ${LOG}
+		sys/debian.sh >> "${LOG}"
 		output sys/debian/radare2/*.deb
 		;;
 	esac
@@ -148,8 +148,8 @@ linux_build() {(
 
 r2b_build() {
 	echo "[*] Pre-generating radare2-bindings ${VERSION_BNDNGS} ..."
-	check radare2-bindings-${VERSION_BNDNGS}.tar.gz && return
-	prepare radare2-bindings ${VERSION_BNDNGS} tmp/radare2-bindings noclean
+	check "radare2-bindings-${VERSION_BNDNGS}.tar.gz" && return
+	prepare radare2-bindings "${VERSION_BNDNGS}" tmp/radare2-bindings noclean
 	# TODO: create a new make target that just creates the .cxx files and not compile them
 	./configure ; cd python && make
 	# TODO: generate tarball with different name :? radare2-bindings-(something)
@@ -165,21 +165,21 @@ docker_linux_r2dec_build() {(
 		;;
 	*)
 		msg "Building amd64 Debian GNU/Linux r2dec package..."
-		check r2dec_${VERSION_R2DEC}_amd64.deb && return
+		check "r2dec_${VERSION_R2DEC}_amd64.deb" && return
 		if [ -d tmp/r2dec ]; then
-			( cd tmp/r2dec ; git pull )
+			( cd tmp/r2dec || exit 1 ; git pull )
 		else
 			mkdir -p tmp
 			git clone --depth 20 https://github.com/wargio/r2dec-js tmp/r2dec
 		fi
 		(
-			cp -f out/${VERSION}/radare2_${VERSION}_amd64.deb tmp/r2dec
-			cp -f out/${VERSION}/radare2-dev_${VERSION}_amd64.deb tmp/r2dec
+			cp -f "out/${VERSION}/radare2_${VERSION}_amd64.deb" tmp/r2dec
+			cp -f "out/${VERSION}/radare2-dev_${VERSION}_amd64.deb" tmp/r2dec
 			export NODE_VERSION=10.15.3
 			export ARCH=x64
-			cd tmp/r2dec
+			cd tmp/r2dec || exit 1
 if [ 1 = 0 ]; then
-			${CWD}/dockcross --image dockcross/linux-${arch} bash -c \
+			"${CWD}/dockcross" --image "dockcross/linux-${arch}" bash -c \
 			"export CFLAGS=-O2 ;
 			export ARCH=${debarch} ;
 			sudo apt-get install -y curl ;
@@ -190,7 +190,7 @@ if [ 1 = 0 ]; then
 			sudo dpkg -i radare2-dev_${VERSION}_amd64.deb"
 fi
 			(
-				cd p/dist/debian
+				cd p/dist/debian || exit 1
 				make -j4
 			)
 		)
@@ -210,15 +210,15 @@ docker_linux_r2frida_build() {(
 	*)
 		msg "Building amd64 Debian GNU/Linux r2frida package..."
 		# XXX r2frida version hardcoded
-		check r2frida_${VERSION_R2FRIDA}_amd64.deb && return
+		check "r2frida_${VERSION_R2FRIDA}_amd64.deb" && return
 		if [ -d tmp/r2frida ]; then
-			( cd tmp/r2frida ; git pull )
+			( cd tmp/r2frida || exit 1 ; git pull )
 		else
 			mkdir -p tmp
 			git clone --depth 20 https://github.com/nowsecure/r2frida tmp/r2frida
 		fi
 		(
-			cd tmp/r2frida
+			cd tmp/r2frida || exit 1
 			git submodule init
 			git submodule update
 		)
@@ -229,17 +229,17 @@ docker_linux_r2frida_build() {(
 		# sudo apt-get -o Acquire::Check-Valid-Until=false update ;
 		#curl -sL https://deb.nodesource.com/setup_10.x | sudo bash - ;
 		#	curl -sSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key | sudo apt-key add - ;
-		#	sudo apt-key update ; 
+		#	sudo apt-key update ;
 		#	sudo apt-get dist-upgrade ;
 		(
-			cp -f out/${VERSION}/radare2_${VERSION}_amd64.deb tmp/r2frida
-			cp -f out/${VERSION}/radare2-dev_${VERSION}_amd64.deb tmp/r2frida
+			cp -f "out/${VERSION}/radare2_${VERSION}_amd64.deb" tmp/r2frida
+			cp -f "out/${VERSION}/radare2-dev_${VERSION}_amd64.deb" tmp/r2frida
 			export NODE_VERSION=10.16.3
 			export ARCH=x64
-			cd tmp/r2frida
-			${CWD}/dockcross --image dockcross/linux-${arch} bash -c \
+			cd tmp/r2frida || exit 1
+			"${CWD}/dockcross" --image "dockcross/linux-${arch}" bash -c \
 			"export CFLAGS=-O2 ;
-			export VERSION=${VERSION} ; 
+			export VERSION=${VERSION} ;
 			export ARCH=${debarch} ;
 			sudo apt-get install -y libssl-dev curl ;
 			curl -fsSLO --compressed https://nodejs.org/dist/v{$NODE_VERSION}/node-v${NODE_VERSION}-linux-${ARCH}.tar.xz ;
@@ -263,32 +263,32 @@ docker_android_build() {(
 	ANDROID_PREFIX="/data/data/org.radare.radare2installer/radare2"
 	case "$mode" in
 	-s|--shell|shell|bash|sh)
-		prepare radare2 ${VERSION} tmp/android-${arch}
-		${CWD}/dockcross --image dockcross/android-${arch} \
+		prepare radare2 "${VERSION}" "tmp/android-${arch}"
+		"${CWD}/dockcross" --image "dockcross/android-${arch}" \
 			./configure \
 				--host="linux-android-${arch}" \
 				--with-ostype=android \
 				--without-pic --with-nonpic \
 				--prefix=${ANDROID_PREFIX}
-		${CWD}/dockcross --image dockcross/android-${arch} bash
+		"${CWD}/dockcross" --image "dockcross/android-${arch}" bash
 		# sys/android-shell.sh $arch
 		;;
 	*|static)
-		check radare2-${VERSION}-android-${arch}.tar.gz && return
-		prepare radare2 ${VERSION} tmp/android-${arch} noclean
-		${CWD}/dockcross --image dockcross/android-${arch} \
+		check "radare2-${VERSION}-android-${arch}.tar.gz" && return
+		prepare radare2 "${VERSION}" "tmp/android-${arch}" noclean
+		"${CWD}/dockcross" --image "dockcross/android-${arch}" \
 			./configure \
 				--host="linux-android-${arch}" \
 				--with-ostype=android \
 				--without-pic --with-nonpic \
 				--prefix=${ANDROID_PREFIX}
-		${CWD}/dockcross --image dockcross/android-${arch} touch binr/preload/libr2.so
-		${CWD}/dockcross --image dockcross/android-${arch} \
+		"${CWD}/dockcross" --image "dockcross/android-${arch}" touch binr/preload/libr2.so
+		"${CWD}/dockcross" --image "dockcross/android-${arch}" \
 			make -s -j 4 ANDROID=1 || return 1
-		${CWD}/dockcross --image dockcross/android-${arch} \
+		"${CWD}/dockcross" --image "dockcross/android-${arch}" \
 			bash -c "ANDROID=1 BUILD=0 sys/android-${arch}.sh" || return 1
-		${CWD}/dockcross --image dockcross/android-${arch} sys/"android-${arch}.sh" >> ${LOG}
-		output radare2-${VERSION}-android-${arch}.tar.gz
+		"${CWD}/dockcross" --image "dockcross/android-${arch}" "sys/android-${arch}.sh" >> "${LOG}"
+		output "radare2-${VERSION}-android-${arch}.tar.gz"
 		;;
 	esac
 )}
@@ -325,25 +325,25 @@ docker_linux_build() {(
 		cmparch="mipsel"
 		;;
 	esac
-	check radare2_${VERSION}_${debarch}.deb
-	check radare2-dev_${VERSION}_${debarch}.deb && return
-	prepare radare2 ${VERSION} tmp/debian-${debarch}
+	check "radare2_${VERSION}_${debarch}.deb"
+	check "radare2-dev_${VERSION}_${debarch}.deb" && return
+	prepare radare2 "${VERSION}" "tmp/debian-${debarch}"
 	case "$arg" in
 	static)
-		${CWD}/dockcross --image dockcross/linux-${arch} \
+		"${CWD}/dockcross" --image "dockcross/linux-${arch}" \
 			bash -c "sys/build.sh --without-pic --with-nonpic ; ARCH=${debarch} sys/debian.sh"
 		output sys/debian/radare2/*.deb
 		;;
 	-s|--shell|shell|bash|sh)
-		${CWD}/dockcross --image dockcross/linux-${arch} bash
+		"${CWD}/dockcross" --image "dockcross/linux-${arch}" bash
 		;;
 	*)
 		S='$'
-		${CWD}/dockcross --image dockcross/linux-${arch} bash -c \
+		"${CWD}/dockcross" --image "dockcross/linux-${arch}" bash -c \
 			"export AR=${cmparch}-linux-${useabi}-ar ;
 			export CC=${cmparch}-linux-${useabi}-gcc ;
 			export PATH=\"/usr/xcc/${cmparch}-linux-${useabi}/bin:${S}PATH\" ;
-			echo "CC=${S}CC" ;
+			echo \"CC=${S}CC\" ;
 			export CFLAGS=-O2 ;
 			export ARCH=${debarch} ;
 			export MAKE='make V=1' ;
@@ -361,13 +361,13 @@ docker_asmjs_build() {(
 	X=radare2-${VERSION}-${arch}
 	case "$mode" in
 	-s|--shell|shell|bash|sh)
-		prepare radare2 ${VERSION} tmp/radare2-asmjs noclean
-		${CWD}/dockcross --image dockcross/browser-asmjs bash
+		prepare radare2 "${VERSION}" tmp/radare2-asmjs noclean
+		"${CWD}/dockcross" --image dockcross/browser-asmjs bash
 		;;
 	*)
 		check "$X".tar.gz && return
-		prepare radare2 ${VERSION} tmp/radare2-asmjs noclean
-		${CWD}/dockcross --image dockcross/browser-asmjs sys/emscripten.sh
+		prepare radare2 "${VERSION}" tmp/radare2-asmjs noclean
+		"${CWD}/dockcross" --image dockcross/browser-asmjs sys/emscripten.sh
 		rm -rf "$X"
 		mkdir -p "$X"
 		cp -f binr/*/*.js "$X"
@@ -384,13 +384,13 @@ docker_wasm_build() {(
 	X=radare2-${VERSION}-${arch}
 	case "$mode" in
 	-s|--shell|shell|bash|sh)
-		prepare radare2 ${VERSION} tmp/radare2-wasm noclean
-		${CWD}/dockcross --image dockcross/browser-asmjs bash
+		prepare radare2 "${VERSION}" tmp/radare2-wasm noclean
+		"${CWD}/dockcross" --image dockcross/browser-asmjs bash
 		;;
 	*)
 		check "$X".tar.gz && return
-		prepare radare2 ${VERSION} tmp/radare2-wasm noclean
-		${CWD}/dockcross --image dockcross/browser-asmjs sys/wasm.sh
+		prepare radare2 "${VERSION}" tmp/radare2-wasm noclean
+		"${CWD}/dockcross" --image dockcross/browser-asmjs sys/wasm.sh
 		rm -rf "$X"
 		mkdir -p "$X"
 		cp -f binr/*/*.wasm "$X"
@@ -403,26 +403,26 @@ docker_wasm_build() {(
 docker_windows_build() {(
 	arch="$1"
 	mode="$2"
-	cd tmp/radare*
+	cd tmp/radare* || exit 1
 	case "$mode" in
 	-s|--shell|shell|sh|bash)
-		${CWD}/dockcross --image dockcross/windows-x64 bash
+		"${CWD}/dockcross" --image dockcross/windows-x64 bash
 		;;
 	*)
 		if [ "${arch}" = "x86_64-w64-mingw32.static-gcc" ]; then
-			check radare2-w64-${VERSION}.zip && return
-			prepare radare2 ${VERSION} tmp/windows-x64
-			${CWD}/dockcross --image dockcross/windows-x64 bash -c "
+			check "radare2-w64-${VERSION}.zip" && return
+			prepare radare2 "${VERSION}" tmp/windows-x64
+			"${CWD}/dockcross" --image dockcross/windows-x64 bash -c "
 				./configure --with-compiler=${arch} --host=${arch} &&
 				make -j4 && make w64dist"
-			output radare2-w64-${VERSION}.zip
+			output "radare2-w64-${VERSION}.zip"
 		else
-			check radare2-w32-${VERSION}.zip && return
-			prepare radare2 ${VERSION} tmp/windows-x32
-			${CWD}/dockcross --image dockcross/windows-x64 bash -c "
+			check "radare2-w32-${VERSION}.zip" && return
+			prepare radare2 "${VERSION}" tmp/windows-x32
+			"${CWD}/dockcross" --image dockcross/windows-x64 bash -c "
 				./configure --with-compiler=${arch} --host=${arch} &&
 				make -j4 && make w32dist"
-			output radare2-w32-${VERSION}.zip
+			output "radare2-w32-${VERSION}.zip"
 		fi
 		;;
 	esac
@@ -431,13 +431,13 @@ docker_windows_build() {(
 ios_appstore() {(
 	arch="$1"
 	[ -z "$1" ] && arch="arm64"
-	check radare2-ios-${arch}-${VERSION}.tar.gz && return
-	prepare radare2 ${VERSION} tmp/ios-appstore
+	check "radare2-ios-${arch}-${VERSION}.tar.gz" && return
+	prepare radare2 "${VERSION}" tmp/ios-appstore
 	msg "Building for the iOS appstore..."
-	sys/ios-static-appstore.sh >> ${LOG}
-	find *| grep gz$
-	mv radare2-ios-${arch}.tar.gz radare2-ios-${arch}-${VERSION}.tar.gz
-	output radare2-ios-${arch}-${VERSION}.tar.gz
+	sys/ios-static-appstore.sh >> "${LOG}"
+	find -- *| grep gz$
+	mv "radare2-ios-${arch}.tar.gz" "radare2-ios-${arch}-${VERSION}.tar.gz"
+	output "radare2-ios-${arch}-${VERSION}.tar.gz"
 )}
 
 ios_build() {(
@@ -445,7 +445,7 @@ ios_build() {(
 	mode="$2"
 	case "$mode" in
 	-s|--shell|shell|sh|bash)
-		prepare radare2 ${VERSION} tmp/ios-cydia-${arch}
+		prepare radare2 "${VERSION}" "tmp/ios-cydia-${arch}"
 		sys/ios-sdk.sh -s
 		exit 0
 		;;
@@ -461,12 +461,12 @@ ios_build() {(
 		D=$O
 		DD=radare2-dev_$S
 	fi
-	check $D && return
-	prepare radare2 ${VERSION} tmp/ios-cydia-${arch}
+	check "$D" && return
+	prepare radare2 "${VERSION}" "tmp/ios-cydia-${arch}"
 	msg "Building ios-${arch}..."
-	$C >> ${LOG}
-	cp -f sys/cydia/radare2/$O $D
-	output $D
+	"$C" >> "${LOG}"
+	cp -f "sys/cydia/radare2/$O" "$D"
+	output "$D"
 	# TODO: radare2-dev is not created with sys/ios-cydia.sh we need to use sys/ios-sdk.sh
 	#output sys/cydia/radare2-dev/${DD}
 )}
@@ -476,13 +476,13 @@ w32_build() {(
 	mode="$2"
 	[ -z "$arch" ] && arch="x86"
 	if [ "$arch" = x64 ]; then
-		return w64_build $arch $mode
+		return $(w64_build "$arch" "$mode")
 	fi
-	check radare2-w32-${VERSION}.zip && return
-	prepare radare2 ${VERSION} tmp/mingw32
+	check "radare2-w32-${VERSION}.zip" && return
+	prepare radare2 "${VERSION}" tmp/mingw32
 	msg "Building mingw32 zip..."
-	sys/mingw32.sh >> ${LOG}
-	output radare2-w32-${VERSION}.zip
+	sys/mingw32.sh >> "${LOG}" || echo 'missing mingw32 compiler'
+	output "radare2-w32-${VERSION}.zip"
 )}
 
 w64_build() {(
@@ -490,20 +490,20 @@ w64_build() {(
 	mode="$2"
 	[ -z "$arch" ] && arch="x64"
 	if [ "$arch" = x86 ]; then
-		return w32_build $arch $mode
+		return $(w32_build "$arch" "$mode")
 	fi
-	check radare2-w64-${VERSION}.zip && return
-	prepare radare2 ${VERSION} tmp/mingw64
+	check "radare2-w64-${VERSION}.zip" && return
+	prepare radare2 "${VERSION}" tmp/mingw64
 	msg "Building mingw64 zip..."
-	sys/mingw64.sh >> ${LOG} || echo 'missing mingw64 compiler'
-	output radare2-w64-${VERSION}.zip
+	sys/mingw64.sh >> "${LOG}" || echo 'missing mingw64 compiler'
+	output "radare2-w64-${VERSION}.zip"
 )}
 
 msvc64_build() {(
 	ZIP="radare2-msvc_64-${VERSION}.zip"
 	builder="vs2017_64"
 	check "${ZIP}" && return
-	appveyor_download ${ZIP} ${builder}
+	appveyor_download "${ZIP}" "${builder}"
 	output "${ZIP}"
 	rm "${ZIP}"
 )}
@@ -512,7 +512,7 @@ msvc64_installer() {(
 	EXE="radare2_installer-msvc_64-${VERSION}.exe"
 	builder="vs2017_64"
 	check "${EXE}" && return
-	appveyor_download ${EXE} ${builder} 1
+	appveyor_download "${EXE}" "${builder}" 1
 	output "${EXE}"
 	rm "${EXE}"
 )}
@@ -540,7 +540,7 @@ appveyor_download() {(
 	installer=$3
 
 	# Retrieve latest msvc release information
-	latest_builds=$(curl -s "https://ci.appveyor.com/api/projects/radare/radare2")
+	latest_builds=$(curl -s "https://ci.appveyor.com/api/projects/radareorg/radare2")
 	# TODO Maybe the api can force the branch
 	if ! echo "${latest_builds}" | grep -q '"branch":"master"'; then
 		err "Cannot find latest appveyor release ..."
@@ -563,8 +563,8 @@ appveyor_download() {(
 
 depends() {
 	if [ ! -d "$1" ]; then
-		git clone --depth 20 https://github.com/radare/$1
-		wget -c https://github.com/radare/radare2/archive/${VERSION}.tar.gz
+		git clone --depth 20 "https://github.com/radareorg/$1"
+		wget -c "https://github.com/radareorg/radare2/archive/${VERSION}.tar.gz"
 	else
 		if [ -n "$1" -a -d "$1" ]; then
 		(
@@ -581,32 +581,32 @@ grab_tarball() {(
 	pkg="$1"
 	ver="$2"
 	[ -z "$ver" ] && ver="${VERSION}"
-	mkdir -p out/${VERSION}
-	cd out/${VERSION}
+	mkdir -p "out/${VERSION}"
+	cd "out/${VERSION}" || exit 1
 	# TODO: use check here
-	if [ -f $pkg-${ver}.tar.gz ]; then
+	if [ -f "$pkg-${ver}.tar.gz" ]; then
 		msg "Already got $pkg-${ver}.tar.gz"
 	else
-		wget -O $pkg-${ver}.tar.gz -c https://github.com/radare/$pkg/archive/${ver}.tar.gz || (
-			rm -f $pkg-${ver}.tar.gz
+		wget -O "$pkg-${ver}.tar.gz" -c "https://github.com/radareorg/$pkg/archive/${ver}.tar.gz" || (
+			rm -f "$pkg-${ver}.tar.gz"
 		)
 	fi
 )}
 
 download_others() {(
-	grab_tarball radare2-extras ${VERSION_EXTRAS}
-	grab_tarball radare2-bindings ${VERSION_BNDNGS}
-	grab_tarball radare2-r2pipe ${VERSION_R2PIPE}
-	grab_tarball radare2-webui ${VERSION_WEBUI}
+	grab_tarball radare2-extras "${VERSION_EXTRAS}"
+	grab_tarball radare2-bindings "${VERSION_BNDNGS}"
+	grab_tarball radare2-r2pipe "${VERSION_R2PIPE}"
+	grab_tarball radare2-webui "${VERSION_WEBUI}"
 )}
 
 android_app() {(
 	if [ -d ../radare2-installer ]; then
 		msg "Building the android app..."
-		cd ../radare2-installer
-		make >> ${LOG}
-		mkdir -p out/${VERSION}
-		cp -f org.radare.radare2installer.apk ${OLDPWD}/out/${VERSION} || msg "Cannot find the apk"
+		cd ../radare2-installer || exit 1
+		make >> "${LOG}"
+		mkdir -p "out/${VERSION}"
+		cp -f org.radare.radare2installer.apk "${OLDPWD}/out/${VERSION}" || msg "Cannot find the apk"
 	else
 		msg "Cannot find ../radare2-installer to build the android app"
 	fi
