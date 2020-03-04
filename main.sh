@@ -63,7 +63,7 @@ release_all() {
 	### populate all binaries
 	publish_cydia
 	publish_out
-	publish_android
+	# publish_android
 
 	### announce
 	publish_irc

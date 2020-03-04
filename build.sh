@@ -58,22 +58,22 @@ download() {(
 	msg "Downloading ${repo} ${vers}"
 	mkdir -p tmp
 	cd tmp || exit 1
-	wget -O "orig-${repo}-${vers}.tar.gz" -qc "https://github.com/radareorg/${repo}/archive/${vers}.tar.gz" || exit 1
+	F="orig-${repo}-${vers}.tar.gz"
+	wget -O "$F" -qc "https://github.com/radareorg/${repo}/archive/${vers}.tar.gz" || exit 1
+	du -hs "$F"
 	msg "Caching capstone clone in a new dist tarball"
-	tar xzf "orig-${repo}-${vers}.tar.gz"
+	tar xzf "$F"
 	if [ "$repo" = radare2 ]; then
 		(
 			cd "${repo}-${vers}" || exit 1
 			./configure > /dev/null
-			(
-				cd shlr || exit 1
-				make capstone
-				rm -rf capstone/.git
-			)
+			make -C shlr capstone
+			rm -rf shlr/capstone/.git
 		)
-		tar czf "${repo}-${vers}.tar.gz ${repo}-${vers}"
+		tar czf "${repo}-${vers}.tar.gz" "${repo}-${vers}"
 	else
-		cp -f "orig-${repo}-${vers}.tar.gz" "${repo}-${vers}.tar.gz"
+		msg "Nothing to cache here"
+		cp -f "$F" "${repo}-${vers}.tar.gz"
 	fi
 	output "${repo}-${vers}.tar.gz"
 )}
